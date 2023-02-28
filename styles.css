@@ -1,0 +1,54 @@
+html{
+    background-color: rgb(54,69,79);
+}
+body{
+    display: flex;
+	justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+img{
+    width: 100%;
+    height: 100%;
+
+}
+img:hover {
+    transform: scaleX(-1);
+  }
+.header{
+    margin-right: 20px;
+}
+
+.info{
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.pokemonImage{
+    border-style: solid;
+    border-width: 2px;
+    border-color: blue;
+
+    height: 250px;
+    width: 250px;
+}
+
+.types{
+    border-style: solid;
+    border-width: 2px;
+    border-color: green;
+}
+
+.more{
+    border-style: solid;
+    border-width: 2px;
+    border-color: yellow;
+}
+#pkmn_name{
+    width: 200px;
+    margin-top: 25px;
+}
+
