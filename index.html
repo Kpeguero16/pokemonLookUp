@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Pokémon Look up</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </head>
 
 <!--
@@ -19,7 +21,7 @@ TO-DO:
 
 -Make all the boxes for the information to go in 
 -Make buttons to let user choose what 
-
+-Add randomize button. Create a random number between 1 and 1010 inclusive. 
 -->
 
 
@@ -28,7 +30,7 @@ TO-DO:
         <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg">
     </div>
     <div class="inputs">
-        <input type="text" id="pokemonName" name="pokemonName" placeholder="Pokemon name...">
+        <input type="text" id="pokemonName" name="pokemonName" placeholder="Name or #">
     </div>
     <div>
         <button id="search">Search</button>
@@ -36,26 +38,15 @@ TO-DO:
 
     <div class="info">
         <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1008.png">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png">
         </div>
+
         <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1008.png">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png">
         </div>
-        <!-- 
-        <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png">
-        </div>
-        <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png">
-        </div>
-        <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png">
-        </div>
-        <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png">
-        </div> -->
-        
+    </div> 
+    <div>
+        <canvas id="myChart"></canvas>
     </div>
 </body>
-<script src="script.js"></script>
 </html>
