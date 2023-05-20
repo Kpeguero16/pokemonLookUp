@@ -1,7 +1,6 @@
 document.querySelector("#search").addEventListener("click", getPokemon);
 
-
-
+//Initializes the radar chart 
 var ctx = document.getElementById("myChart").getContext("2d");
   var myChart = new Chart(ctx, {
     type: 'radar',
@@ -9,7 +8,7 @@ var ctx = document.getElementById("myChart").getContext("2d");
       labels: ['HP','Attack', 'Defense', 'S-Attack', 'S-Defense', 'Speed'],
       datasets: [{
         label: 'Dataset 1',
-        data: [78, 85, 78, 109, 85, 100],
+        data: [78, 84, 78, 109, 85, 100],
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 1
@@ -17,9 +16,14 @@ var ctx = document.getElementById("myChart").getContext("2d");
     },
     options: {
       scale: {
-        ticks: {
-          beginAtZero: true
-        }
+        r: {
+          angleLines: {
+              display: false
+          },
+          suggestedMin: 50,
+          suggestedMax: 110,
+          stepSize: 10
+      }
       }
     }
   });
@@ -42,24 +46,6 @@ function getPokemon(e)
   {
     notFound();
   }
-
-  
-
-  // document.querySelector(".info").innerHTML =
-  // `
-  // <div class="pokemonImage">
-  //   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/395.png">
-  // </div>
-  // <div>
-  //   <canvas id="myChart"></canvas>
-  // </div>
-  // <div class="pokemonImage">
-  //   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/395.png">
-  // </div>
-  // `;
-  
-  
-
 }
 
 async function getDefaultSprite(a) {
