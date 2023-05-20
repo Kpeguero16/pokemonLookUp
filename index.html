@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Pokémon Look up</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
 </head>
 
 <!--
@@ -35,18 +33,23 @@ TO-DO:
     <div>
         <button id="search">Search</button>
     </div>
-
+    <div class="Pkmn_name">
+        <h1 id="name_en">CHARIZARD</h1>
+        <h3 id="name_jp">リザードン</h3>
+    </div>
     <div class="info">
         <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png">
+            <img id="defaultSprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png">
         </div>
-
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
         <div class="pokemonImage">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png">
+            <img id="shinySprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png">
         </div>
     </div> 
-    <div>
-        <canvas id="myChart"></canvas>
-    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
