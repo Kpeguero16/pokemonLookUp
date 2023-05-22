@@ -20,6 +20,7 @@ TO-DO:
 -Make all the boxes for the information to go in 
 -Make buttons to let user choose what 
 -Add randomize button. Create a random number between 1 and 1010 inclusive. 
+-Add text saying a shiny does not exist when pokemon.shinySprite is null
 -->
 
 
@@ -37,20 +38,19 @@ TO-DO:
     </div>
 
     <div class="Pkmn_name">
-        <h1 id="name_en">CHARIZARD</h1>
-        <h3 id="name_jp">リザードン</h3>
+        <h1 id="name_en">Name</h1>
+        <h3 id="name_jp">Id</h3>
     </div>
 
     <div class="info">
         <div class="pokemonImage border">
-            <img id="defaultSprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png">
+            <img id="defaultSprite" src="not_found.png">
         </div>
         <div>
             <canvas id="myChart" class="border"></canvas>
         </div>
         <div class="pokemonImage border">
-            <img id="shinySprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png">
-        </div>
+            <img id="shinySprite" src="not_found.png">
     </div> 
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
