@@ -1,3 +1,30 @@
+var ctx = document.getElementById("myChart").getContext("2d");
+  var myChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['HP','Attack', 'Defense', 'S-Attack', 'S-Defense', 'Speed'],
+      datasets: [{
+        label: 'Dataset 1',
+        data: [10,10,10,0,0,0],
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scale: {
+        r: {
+          angleLines: {
+              display: false
+          },
+          suggestedMin: 0,
+          suggestedMax: 110,
+          stepSize: 10
+      }
+      }
+    }
+  });
+
 const fetchPokemon = () => {
   const name = document.querySelector("#pokemonName").value;
   document.querySelector("#pokemonName").value = '';
@@ -16,7 +43,8 @@ const fetchPokemon = () => {
       id: data.id, 
       defaultSprite: data.sprites['front_default'],
       shinySprite: data.sprites['front_shiny'],
-      type: data.types.map((type) => type.type.name)
+      type: data.types.map((type) => type.type.name),
+      stats: data.stats.map((stat) => stat['base_stat'])
     };
     console.log(pokemon)
     display(pokemon);
@@ -29,6 +57,7 @@ const fetchPokemon = () => {
 }
 
 
+
 const display = (pokemon) => {
   document.getElementById("defaultSprite").src = pokemon.defaultSprite;
   if(pokemon.shinySprite != null)
@@ -36,38 +65,15 @@ const display = (pokemon) => {
     else document.getElementById("shinySprite").src = "";
   document.getElementById("name_en").textContent = capitalize(pokemon.name);
   document.getElementById("name_jp").textContent = pokemon.id;
+  const IVs = pokemon.stats;
+  myChart.data.datasets[0].data = pokemon.stats;
+  myChart.update();
 }
 
 document.querySelector("#search").addEventListener("click", fetchPokemon);
 
-const IVs =[];
 //Initializes the radar chart 
-var ctx = document.getElementById("myChart").getContext("2d");
-  var myChart = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: ['HP','Attack', 'Defense', 'S-Attack', 'S-Defense', 'Speed'],
-      datasets: [{
-        label: 'Dataset 1',
-        data: IVs,
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scale: {
-        r: {
-          angleLines: {
-              display: false
-          },
-          suggestedMin: 50,
-          suggestedMax: 110,
-          stepSize: 10
-      }
-      }
-    }
-  });
+
 
 function notFound() 
 {
