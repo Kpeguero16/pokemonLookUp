@@ -1,4 +1,40 @@
-document.querySelector("#search").addEventListener("click", getPokemon);
+const fetchPokemon = () => {
+  const name = document.querySelector("#pokemonName").value;
+  document.querySelector("#pokemonName").value = '';
+  if(name != "")
+  {
+  const url = `https://pokeapi.co/api/v2/pokemon/${name}`
+  fetch(url)
+  .then((res) => {
+    return res.json();
+  })
+  .then((data) => {
+    console.log(data)
+
+    const pokemon = {
+      name: data.name,
+      id: data.id, 
+      defaultSprite: data.sprites['front_default'],
+      shinySprite: data.sprites['front_shiny'],
+      type: data.types.map((type) => type.type.name)
+    };
+    console.log(pokemon)
+    display(pokemon);
+  })
+  }
+  else
+  {
+    notFound();
+  }
+}
+
+
+const display = (pokemon) => {
+  document.getElementById("defaultSprite").src = pokemon.defaultSprite;
+  document.getElementById("shinySprite").src = pokemon.shinySprite;
+}
+
+document.querySelector("#search").addEventListener("click", fetchPokemon);
 
 //Initializes the radar chart 
 var ctx = document.getElementById("myChart").getContext("2d");
@@ -28,56 +64,6 @@ var ctx = document.getElementById("myChart").getContext("2d");
     }
   });
 
-function getPokemon(e)
-{
-  const name = document.querySelector("#pokemonName").value;
-  document.querySelector("#pokemonName").value = '';
-  if(name != "")
-  {
-    getDefaultSprite(name.toLowerCase()).then(spriteUrl => {
-      document.getElementById("defaultSprite").src = spriteUrl;
-    })
-
-    getShinySprite(name.toLowerCase()).then(spriteUrl => {
-      document.getElementById("shinySprite").src = spriteUrl;
-    })
-  }
-  else
-  {
-    notFound();
-  }
-}
-
-async function getDefaultSprite(a) {
-  // const name = document.querySelector("#pokemonName").value;
-  try {
-    console.log("https://pokeapi.co/api/v2/pokemon/"+ a)
-    const response = await fetch("https://pokeapi.co/api/v2/pokemon/"+ a);
-    const data = await response.json();
-    const spriteUrl = data.sprites.front_default;
-    console.log(spriteUrl);
-    return spriteUrl;
-  } catch (error) {
-    console.log('Error:', error);
-    notFound();
-  }
-}
-
-async function getShinySprite(a) {
-  // const name = document.querySelector("#pokemonName").value;
-  try {
-    console.log("https://pokeapi.co/api/v2/pokemon/"+ a)
-    const response = await fetch("https://pokeapi.co/api/v2/pokemon/"+ a);
-    const data = await response.json();
-    const spriteUrl = data.sprites.front_shiny;
-    console.log(spriteUrl);
-    return spriteUrl;
-  } catch (error) {
-    console.log('Error:', error);
-    notFound();
-  }
-}
-
 function notFound() 
 {
   document.getElementById("name_en").textContent = "Not found";
@@ -85,3 +71,4 @@ function notFound()
   document.getElementById("defaultSprite").src = "not_found.png";
   document.getElementById("shinySprite").src = "not_found.png";
 }
+
