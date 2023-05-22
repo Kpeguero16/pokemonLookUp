@@ -1,3 +1,4 @@
+IVs = [0,0,0,0,0,0];
 var ctx = document.getElementById("myChart").getContext("2d");
   var myChart = new Chart(ctx, {
     type: 'radar',
@@ -5,7 +6,7 @@ var ctx = document.getElementById("myChart").getContext("2d");
       labels: ['HP','Attack', 'Defense', 'S-Attack', 'S-Defense', 'Speed'],
       datasets: [{
         label: 'Dataset 1',
-        data: [10,10,10,0,0,0],
+        data: IVs,
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderColor: 'rgba(255, 99, 132, 1)',
         borderWidth: 1
@@ -18,7 +19,7 @@ var ctx = document.getElementById("myChart").getContext("2d");
               display: false
           },
           suggestedMin: 0,
-          suggestedMax: 110,
+          suggestedMax: largestValue(IVs),
           stepSize: 10
       }
       }
@@ -86,4 +87,13 @@ function notFound()
 function capitalize(a) 
 {
   return a.substring(0,1).toUpperCase() + a.substring(1);
+}
+
+function largestValue(arr) {
+  if (arr.length === 0) {
+    // Handle empty array case
+    return null;
+  }
+  
+  return Math.max(...arr);
 }
