@@ -5,7 +5,7 @@ var ctx = document.getElementById("myChart").getContext("2d");
   var myChart = new Chart(ctx, {
     type: 'radar',
     data: {
-      labels: ['HP','Attack', 'Defense', 'S-Attack', 'S-Defense', 'Speed'],
+      labels: ['HP','Attack', 'Defense', 'Speed', 'S-Defense', 'S-Attack'],
       datasets: [{
         label: 'Dataset 1',
         data: IVs,
@@ -83,7 +83,10 @@ const display = (pokemon) => {
   document.getElementById("name_en").textContent = capitalize(pokemon.name);
   document.getElementById("dex_number").textContent = pokemon.id;
   const IVs = pokemon.stats;
-  myChart.data.datasets[0].data = pokemon.stats;
+  console.log(IVs);
+  switchValues(IVs, 3,5);
+  console.log("after: " + IVs);
+  myChart.data.datasets[0].data = IVs;
   myChart.update();
 }
 
@@ -135,6 +138,18 @@ function largestValue(arr) {
   }
   
   return Math.max(...arr);
+}
+
+function switchValues(arr, index1, index2) {
+  if (index1 < 0 || index1 >= arr.length || index2 < 0 || index2 >= arr.length) {
+    console.error("Invalid indexes provided.");
+    return;
+  }
+
+  // Switch values using a temporary variable
+  var temp = arr[index1];
+  arr[index1] = arr[index2];
+  arr[index2] = temp;
 }
 
 document.querySelector("#search").addEventListener("click", fetchPokemon);
