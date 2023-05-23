@@ -21,6 +21,7 @@ TO-DO:
 -Make buttons to let user choose what 
 -Add randomize button. Create a random number between 1 and 1010 inclusive. 
 -Add text saying a shiny does not exist when pokemon.shinySprite is null
+-Add compare pokemon function
 -->
 
 
@@ -34,23 +35,28 @@ TO-DO:
     </div>
 
     <div>
+        <button id="backwards"><</button>
         <button id="search">Search</button>
+        <button id="forwards">></button>
+    </div>
+    <div>
+        <button id="randomize">Randomize</button>
     </div>
 
     <div class="Pkmn_name">
         <h1 id="name_en">Name</h1>
-        <h3 id="name_jp">Id</h3>
+        <h3 id="dex_number">Id</h3>
     </div>
 
     <div class="info">
         <div class="pokemonImage border">
-            <img id="defaultSprite" src="not_found.png">
+            <img id="defaultSprite" class="easterEgg" src="not_found.png">
         </div>
         <div>
             <canvas id="myChart" class="border"></canvas>
         </div>
         <div class="pokemonImage border">
-            <img id="shinySprite" src="not_found.png">
+            <img id="shinySprite" class="easterEgg" src="not_found.png">
     </div> 
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

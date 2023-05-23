@@ -14,59 +14,7 @@ img{
     height: 100%;
 
 }
-img:hover {
-    transform: scaleX(-1);
-}
-canvas{
-    height: 350px;
-    width: 350px;
-}
 button{
-    margin-top:25%;
-}
-.header{
-    margin-right: 20px;
-}
-
-.info{
-    margin-top: 100px;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-.pokemonImage{
-
-    height: 200px;
-    width: 200px;
-}
-
-.Pkmn_name{
-    margin-bottom: -7.5%;
-}
-.border{
-    border: 3px solid #000000;
-}
-#pkmn{
-    width: 200px;
-    margin-top: 25px;
-}
-#search {
-  /* display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px 14px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-  border-radius: 6px;
-  border: none;
-
-  background: #6E6D70;
-  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1), inset 0px 0.5px 0.5px rgba(255, 255, 255, 0.5), 0px 0px 0px 0.5px rgba(0, 0, 0, 0.12);
-  color: #DFDEDF;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation; */
-
   align-self: center;
   background-color: #fff;
   background-image: none;
@@ -97,14 +45,52 @@ button{
   touch-action: manipulation;
 }
 
-#search:hover {
-  box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
-  transform: translate3d(0, 2px, 0);
+.easterEgg:hover {
+    transform: scaleX(-1);
+}
+canvas{
+    height: 350px;
+    width: 350px;
+}
+button{
+    margin-top:25%;
+}
+button:hover {
+    box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+    transform: translate3d(0, 2px, 0);
+  }
+  
+button:focus {
+    box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+}
+.header{
+    margin-right: 20px;
 }
 
-#search:focus {
-  box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+.info{
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 }
+
+.pokemonImage{
+
+    height: 200px;
+    width: 200px;
+}
+
+.Pkmn_name{
+    margin-bottom: -5%;
+}
+.border{
+    border: 3px solid #000000;
+}
+#pkmn{
+    width: 200px;
+    margin-top: 25px;
+}
+
 
 
 /* #search:focus {
