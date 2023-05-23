@@ -15,6 +15,11 @@ var ctx = document.getElementById("myChart").getContext("2d");
       }]
     },
     options: {
+      plugins: {
+        legend: {
+          display: false, // Set display to false to hide the legend
+        },
+      },
       scale: {
         r: {
           angleLines: {
@@ -83,9 +88,7 @@ const display = (pokemon) => {
   document.getElementById("name_en").textContent = capitalize(pokemon.name);
   document.getElementById("dex_number").textContent = pokemon.id;
   const IVs = pokemon.stats;
-  console.log(IVs);
   switchValues(IVs, 3,5);
-  console.log("after: " + IVs);
   myChart.data.datasets[0].data = IVs;
   myChart.update();
 }
