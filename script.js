@@ -53,7 +53,7 @@ const fetchLast = () => {
   const name = document.getElementById("dex_number").textContent - 1;
   if(name != NaN && name != "NaN")
   {
-    apiCall(name.toLowerCase());
+    apiCall(name);
   }
   else
   {
@@ -66,7 +66,7 @@ const fetchNext = () => {
   const name = document.getElementById("dex_number").textContent - 1 + 2;
   if(name != NaN && name != "NaN")
   {
-    apiCall(name.toLowerCase());
+    apiCall(name);
   }
   else
   {
