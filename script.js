@@ -39,7 +39,7 @@ const fetchPokemon = () => {
   document.querySelector("#pokemonName").value = '';
   if(name != "")
   {
-    apiCall(name);
+    apiCall(name.toLowerCase());
   }
   else
   {
@@ -53,7 +53,7 @@ const fetchLast = () => {
   const name = document.getElementById("dex_number").textContent - 1;
   if(name != NaN && name != "NaN")
   {
-    apiCall(name);
+    apiCall(name.toLowerCase());
   }
   else
   {
@@ -66,7 +66,7 @@ const fetchNext = () => {
   const name = document.getElementById("dex_number").textContent - 1 + 2;
   if(name != NaN && name != "NaN")
   {
-    apiCall(name);
+    apiCall(name.toLowerCase());
   }
   else
   {
@@ -96,14 +96,13 @@ const display = (pokemon) => {
 // Makes a call to the pokeapi and generates a 'pokemon' object with all the desired attributes
 function apiCall(name)
 {
-  const url = `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`
+  const url = `https://pokeapi.co/api/v2/pokemon/${name}`
   fetch(url)
   .then((res) => {
     return res.json();
   })
   .then((data) => {
     console.log(data)
-
     const pokemon = {
       name: data.name,
       id: data.id, 
