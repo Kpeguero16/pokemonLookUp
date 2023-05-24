@@ -96,7 +96,7 @@ const display = (pokemon) => {
 // Makes a call to the pokeapi and generates a 'pokemon' object with all the desired attributes
 function apiCall(name)
 {
-  const url = `https://pokeapi.co/api/v2/pokemon/${name}`
+  const url = `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`
   fetch(url)
   .then((res) => {
     return res.json();
