@@ -7,7 +7,7 @@ var ctx = document.getElementById("myChart").getContext("2d");
     data: {
       labels: ['HP','Attack', 'Defense', 'Speed', 'S-Defense', 'S-Attack'],
       datasets: [{
-        label: 'Dataset 1',
+        label: 'Base Stats',
         data: IVs,
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderColor: 'rgba(255, 99, 132, 1)',
