@@ -87,6 +87,7 @@ const display = (pokemon) => {
     else document.getElementById("shinySprite").src = "";
   document.getElementById("name_en").textContent = capitalize(pokemon.name);
   document.getElementById("dex_number").textContent = pokemon.id;
+  document.getElementById("types").textContent = pokemon.type;
   const IVs = pokemon.stats;
   switchValues(IVs, 3,5);
   myChart.data.datasets[0].data = IVs;
