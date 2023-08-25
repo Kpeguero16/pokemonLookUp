@@ -98,3 +98,10 @@ canvas{
   align-items: center;
   margin-bottom: -5%;
 }
+
+.moreInfo{
+    display: flex;
+	justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
