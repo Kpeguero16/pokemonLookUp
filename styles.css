@@ -16,8 +16,10 @@ img{
     height: 100%;
 
 }
-
 button{
+    cursor: pointer;
+}
+button, #pokemonName{
   align-self: center;
   background-color: #fff;
   background-image: none;
@@ -30,7 +32,6 @@ button{
   box-shadow: rgba(0, 0, 0, .2) 15px 28px 25px -18px;
   box-sizing: border-box;
   color: #41403e;
-  cursor: pointer;
   display: inline-block;
   font-family: Neucha, sans-serif;
   font-size: 1rem;
