@@ -7,19 +7,57 @@
     <link rel="stylesheet" href="styles.css">
     <title>Pokémon Look up</title>
 </head>
+
+<!--
+TO-DO:
+-If the api request is undefined then print out a message 
+-Add text saying a shiny does not exist when pokemon.shinySprite is null
+-Add compare pokemon function
+-->
+
+
 <body>
-    <section>
-        <!--    Insert search bar here    -->
-    </section>
-    <section>
-        <div class="grid-container">
-            <div class="box" style="grid-area: box-1"></div>
-            <div class="box" style="grid-area: box-2"></div>
-            <div class="box" style="grid-area: box-3"></div>
-            <div class="box" style="grid-area: box-4"></div>
-            <div class="box" style="grid-area: box-5"></div>
-            <div class="box" style="grid-area: box-6"></div>
+    <div class="header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg">
+    </div>
+
+    <div class="inputs">
+        <label for="pokemonName"></label><input type="text" id="pokemonName" name="pokemonName" placeholder="Name or #">
+    </div>
+
+    <div>
+        <button id="backwards"><</button>
+        <button id="search">Search</button>
+        <button id="forwards">></button>
+    </div>
+    <div>
+        <button id="randomize">Randomize</button>
+    </div>
+
+    <div class="Pkmn_name">
+        <h1 id="name_en">Name</h1>
+        <h3 id="dex_number">Id</h3>
+        <h3 id="types">Type(s)</h3>
+    </div>
+
+    <div class="info">
+        <div class="pokemonImage border">
+            <img id="defaultSprite" class="easterEgg" src="resources/not_found.png">
         </div>
-    </section>
+        <div>
+            <canvas id="myChart" class="border"></canvas>
+        </div>
+        <div class="pokemonImage border">
+            <img id="shinySprite" class="easterEgg" src="resources/not_found.png">
+        </div> 
+    </div>
+    <div class="moreInfo">
+        <div>
+            <button id="moreInfo">More Info</button>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
