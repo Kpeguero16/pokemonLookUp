@@ -2,62 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Look Up</title>
     <link rel="stylesheet" href="styles.css">
-    <title>Pokémon Look up</title>
 </head>
-
-<!--
-TO-DO:
--If the api request is undefined then print out a message 
--Add text saying a shiny does not exist when pokemon.shinySprite is null
--Add compare pokemon function
--->
-
-
 <body>
-    <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg">
-    </div>
+    <header>
+        <h1>Pokémon Look Up</h1>
+        <nav></nav>
+    </header>
+    <main>
 
-    <div class="inputs">
-        <label for="pokemonName"></label><input type="text" id="pokemonName" name="pokemonName" placeholder="Name or #">
-    </div>
+    </main>
+    <footer></footer>
+    <script src="script.js" defer></script>
 
-    <div>
-        <button id="backwards"><</button>
-        <button id="search">Search</button>
-        <button id="forwards">></button>
-    </div>
-    <div>
-        <button id="randomize">Randomize</button>
-    </div>
-
-    <div class="Pkmn_name">
-        <h1 id="name_en">Name</h1>
-        <h3 id="dex_number">Id</h3>
-        <h3 id="types">Type(s)</h3>
-    </div>
-
-    <div class="info">
-        <div class="pokemonImage border">
-            <img id="defaultSprite" class="easterEgg" src="resources/not_found.png">
-        </div>
-        <div>
-            <canvas id="myChart" class="border"></canvas>
-        </div>
-        <div class="pokemonImage border">
-            <img id="shinySprite" class="easterEgg" src="resources/not_found.png">
-        </div> 
-    </div>
-    <div class="moreInfo">
-        <div>
-            <button id="moreInfo">More Info</button>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>
