@@ -18,9 +18,9 @@ This project is currently in development. I am restructuring PokémonLookUp as a
 #### Original Design → Concept → Current
 
 <p align="center">
-  <img width="800" alt="Original Design" src="https://github.com/user-attachments/assets/6d342749-e6f2-4cd3-ac5e-c87dabe8d0d8" />
-  <img width="800" alt="Concept" src="https://github.com/user-attachments/assets/9486ea57-3d29-4059-80a7-cca86a2d8aef" />
-  <img width="800" alt="Current Design" src="https://github.com/user-attachments/assets/b4d7bf29-c1f3-4899-8d8d-389e9cc4dba1" />
+  <img width="350" alt="Original Design" src="https://github.com/user-attachments/assets/6d342749-e6f2-4cd3-ac5e-c87dabe8d0d8" />
+  <img width="350" alt="Concept" src="https://github.com/user-attachments/assets/9486ea57-3d29-4059-80a7-cca86a2d8aef" />
+  <img width="350" alt="Current Design" src="https://github.com/user-attachments/assets/b4d7bf29-c1f3-4899-8d8d-389e9cc4dba1" />
 </p>
 
 
