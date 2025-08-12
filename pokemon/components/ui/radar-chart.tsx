@@ -29,7 +29,6 @@ export default function BasicRadar() {
         ];
 
         const baseStats = desiredStatsOrder.map((statName) => {
-          // <-- Here is the fix: type annotation added to 's'
           const statObj = data.stats.find((s: { stat: { name: string } }) => s.stat.name === statName);
           return statObj ? statObj.base_stat : 0;
         });
