@@ -1,4 +1,5 @@
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid"
+import BasicRadar from "@/components/ui/radar-chart"
 
 export default function Home() {
   return (
@@ -33,7 +34,8 @@ export default function Home() {
         </BentoGridItem>
         <BentoGridItem className="row-span-2">
           <h3 className="text-white font-semibold mb-2">STATS</h3>
-          <p className="text-white/80 text-sm">This box will contain a radar chart of the Pokémon stats generated with Mui X</p>
+          {/* <p className="text-white/80 text-sm">This box will contain a radar chart of the Pokémon stats generated with Mui X</p> */}
+          <BasicRadar />
         </BentoGridItem>
         <BentoGridItem className="row-span-2">
           <h3 className="text-white font-semibold mb-2">Sprite</h3>
