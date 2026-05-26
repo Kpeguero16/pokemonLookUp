@@ -17,7 +17,7 @@ export function AddToTeamButton({ pokemon }: AddToTeamButtonProps) {
     return (
       <button
         onClick={() => removePokemon(pokemon.id)}
-        className="px-5 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl border-2 border-red-200 transition-colors"
+        className="px-5 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-semibold rounded-xl border-2 border-red-200 dark:border-red-800 transition-colors"
       >
         ✕ Remove from Team
       </button>
@@ -28,7 +28,7 @@ export function AddToTeamButton({ pokemon }: AddToTeamButtonProps) {
     return (
       <button
         disabled
-        className="px-5 py-2 bg-slate-100 text-slate-400 font-semibold rounded-xl border-2 border-slate-200 cursor-not-allowed"
+        className="px-5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-semibold rounded-xl border-2 border-slate-200 dark:border-slate-600 cursor-not-allowed"
       >
         Team Full (6/6)
       </button>

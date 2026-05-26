@@ -33,7 +33,7 @@ export function SearchBar({ onSearch, onPrev, onNext, onRandomize, currentId }: 
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Name or Pokédex number..."
-          className="flex-1 px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 transition-colors"
+          className="flex-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-400 transition-colors"
         />
         <button
           type="submit"
@@ -47,7 +47,7 @@ export function SearchBar({ onSearch, onPrev, onNext, onRandomize, currentId }: 
         <button
           onClick={onPrev}
           disabled={currentId === null || currentId <= 1}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-semibold rounded-xl transition-colors"
+          className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition-colors"
         >
           ← Prev
         </button>
@@ -60,7 +60,7 @@ export function SearchBar({ onSearch, onPrev, onNext, onRandomize, currentId }: 
         <button
           onClick={onNext}
           disabled={currentId === null}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-semibold rounded-xl transition-colors"
+          className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition-colors"
         >
           Next →
         </button>

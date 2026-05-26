@@ -15,11 +15,11 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
   const fallbackSrc = '/pokemonLookUp/not_found.png';
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-lg flex flex-col items-center gap-4">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 w-full max-w-lg flex flex-col items-center gap-4 transition-colors duration-200">
       {/* Header */}
       <div className="text-center">
-        <p className="text-slate-400 text-sm font-mono">#{String(pokemon.id).padStart(4, '0')}</p>
-        <h2 className="text-2xl font-bold text-slate-800">{capitalize(pokemon.name)}</h2>
+        <p className="text-slate-400 dark:text-slate-500 text-sm font-mono">#{String(pokemon.id).padStart(4, '0')}</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{capitalize(pokemon.name)}</h2>
       </div>
 
       {/* Types */}
@@ -38,7 +38,7 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
             className="w-32 h-32 object-contain image-pixelated hover:-scale-x-100 transition-transform duration-200 cursor-pointer"
             onError={(e) => { (e.target as HTMLImageElement).src = fallbackSrc; }}
           />
-          <span className="text-xs text-slate-400 font-medium">Default</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Default</span>
         </div>
 
         <div className="flex flex-col items-center gap-1">
@@ -50,17 +50,17 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
               onError={(e) => { (e.target as HTMLImageElement).src = fallbackSrc; }}
             />
           ) : (
-            <div className="w-32 h-32 flex items-center justify-center bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
-              <span className="text-slate-400 text-xs text-center">No shiny sprite</span>
+            <div className="w-32 h-32 flex items-center justify-center bg-slate-50 dark:bg-slate-700 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-600">
+              <span className="text-slate-400 dark:text-slate-500 text-xs text-center">No shiny sprite</span>
             </div>
           )}
-          <span className="text-xs text-slate-400 font-medium">✨ Shiny</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">✨ Shiny</span>
         </div>
       </div>
 
       {/* Stat Radar Chart */}
       <div className="w-full">
-        <h3 className="text-center text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+        <h3 className="text-center text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
           Base Stats
         </h3>
         <StatRadarChart stats={pokemon.stats} />

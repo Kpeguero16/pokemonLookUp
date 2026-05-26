@@ -9,23 +9,23 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useTeamAnalysis } from '../../hooks/useTeamAnalysis';
+import { useThemeStore } from '../../store/themeStore';
 import { ALL_TYPES } from '../../constants/typeChart';
 
-/** Color-code a bar by effectiveness multiplier */
 function offensiveColor(multiplier: number): string {
-  if (multiplier === 0)    return '#94a3b8'; // immune — gray
-  if (multiplier <= 0.5)   return '#fbbf24'; // not very effective — yellow
-  if (multiplier === 1)    return '#e2e8f0'; // normal — light
-  if (multiplier === 2)    return '#34d399'; // super effective — green
-  return '#059669';                          // 4x — dark green (dual-type)
+  if (multiplier === 0)  return '#94a3b8'; // immune — gray
+  if (multiplier <= 0.5) return '#fbbf24'; // not very effective — yellow
+  if (multiplier === 1)  return '#cbd5e1'; // normal — slate
+  if (multiplier === 2)  return '#34d399'; // super effective — green
+  return '#059669';                        // 4x — dark green
 }
 
 function defensiveColor(multiplier: number): string {
-  if (multiplier === 0)    return '#34d399'; // immune — green (good!)
-  if (multiplier <= 0.5)   return '#86efac'; // resistant — light green
-  if (multiplier <= 1)     return '#e2e8f0'; // neutral — light
-  if (multiplier <= 2)     return '#fca5a5'; // weak — light red
-  return '#ef4444';                          // very weak — red
+  if (multiplier === 0)  return '#34d399'; // immune — green (good!)
+  if (multiplier <= 0.5) return '#86efac'; // resistant — light green
+  if (multiplier <= 1)   return '#cbd5e1'; // neutral — slate
+  if (multiplier <= 2)   return '#fca5a5'; // weak — light red
+  return '#ef4444';                        // very weak — red
 }
 
 interface ChartEntry {
@@ -39,32 +39,46 @@ function CoverageChart({
   referenceValue,
   title,
   description,
+  isDark,
 }: {
   data: ChartEntry[];
   colorFn: (v: number) => string;
   referenceValue: number;
   title: string;
   description: string;
+  isDark: boolean;
 }) {
+  const axisColor    = isDark ? '#64748b' : '#94a3b8';
+  const refColor     = isDark ? '#475569' : '#94a3b8';
+  const tooltipBg    = isDark ? '#1e293b' : '#ffffff';
+  const tooltipText  = isDark ? '#e2e8f0' : '#1e293b';
+  const tooltipBorder = isDark ? '#334155' : '#e2e8f0';
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 w-full">
-      <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{title}</h3>
-      <p className="text-xs text-slate-400 mb-3">{description}</p>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 w-full transition-colors duration-200">
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wide">{title}</h3>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">{description}</p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 5, right: 5, bottom: 40, left: -20 }}>
           <XAxis
             dataKey="type"
-            tick={{ fontSize: 10, fill: '#94a3b8' }}
+            tick={{ fontSize: 10, fill: axisColor }}
             angle={-45}
             textAnchor="end"
             interval={0}
           />
-          <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} />
+          <YAxis tick={{ fontSize: 10, fill: axisColor }} />
           <Tooltip
             formatter={(v) => [`${v}×`, 'Multiplier']}
-            contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+            contentStyle={{
+              borderRadius: '8px',
+              fontSize: '12px',
+              backgroundColor: tooltipBg,
+              color: tooltipText,
+              border: `1px solid ${tooltipBorder}`,
+            }}
           />
-          <ReferenceLine y={referenceValue} stroke="#94a3b8" strokeDasharray="4 2" />
+          <ReferenceLine y={referenceValue} stroke={refColor} strokeDasharray="4 2" />
           <Bar dataKey="value" radius={[4, 4, 0, 0]}>
             {data.map((entry) => (
               <Cell key={entry.type} fill={colorFn(entry.value)} />
@@ -78,6 +92,7 @@ function CoverageChart({
 
 export function TypeCoveragePanel() {
   const { offensiveCoverage, defensiveExposure } = useTeamAnalysis();
+  const isDark = useThemeStore((s) => s.isDark);
 
   const offensiveData: ChartEntry[] = ALL_TYPES.map((type) => ({
     type,
@@ -97,6 +112,7 @@ export function TypeCoveragePanel() {
         referenceValue={1}
         title="Offensive Coverage"
         description="Best hit your team can land on each type (using Pokémon's own types)"
+        isDark={isDark}
       />
       <CoverageChart
         data={defensiveData}
@@ -104,6 +120,7 @@ export function TypeCoveragePanel() {
         referenceValue={1}
         title="Defensive Weaknesses"
         description="Avg. damage multiplier your team receives from each attacking type"
+        isDark={isDark}
       />
     </div>
   );

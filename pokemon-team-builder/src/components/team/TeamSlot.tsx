@@ -17,19 +17,19 @@ export function TeamSlot({ pokemon, slotIndex }: TeamSlotProps) {
 
   if (!pokemon) {
     return (
-      <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 min-h-36">
-        <span className="text-3xl text-slate-300">⬡</span>
-        <span className="text-sm text-slate-400 font-medium">Slot {slotIndex + 1}</span>
+      <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 min-h-36 transition-colors duration-200">
+        <span className="text-3xl text-slate-300 dark:text-slate-600">⬡</span>
+        <span className="text-sm text-slate-400 dark:text-slate-500 font-medium">Slot {slotIndex + 1}</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-sm relative group">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-sm relative group transition-colors duration-200">
       {/* Remove button */}
       <button
         onClick={() => removePokemon(pokemon.id)}
-        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors opacity-0 group-hover:opacity-100"
         title="Remove from team"
       >
         ✕
@@ -45,8 +45,8 @@ export function TeamSlot({ pokemon, slotIndex }: TeamSlotProps) {
 
       {/* Name & number */}
       <div className="text-center">
-        <p className="text-xs text-slate-400 font-mono">#{String(pokemon.id).padStart(4, '0')}</p>
-        <p className="text-sm font-bold text-slate-700">{capitalize(pokemon.name)}</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">#{String(pokemon.id).padStart(4, '0')}</p>
+        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{capitalize(pokemon.name)}</p>
       </div>
 
       {/* Types */}
