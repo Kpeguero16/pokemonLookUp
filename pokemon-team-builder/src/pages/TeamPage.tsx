@@ -1,46 +1,275 @@
-import { Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDexStore } from '../store/dexStore';
 import { useTeamStore } from '../store/teamStore';
-import { TeamGrid } from '../components/team/TeamGrid';
-import { TeamStatChart } from '../components/team/TeamStatChart';
-import { TypeCoveragePanel } from '../components/team/TypeCoveragePanel';
+import { useToastStore } from '../store/toastStore';
+import { useTeam } from '../hooks/useTeam';
+import { TYPE_HEX } from '../constants/typeColors';
+import { TypeBadge } from '../components/layout/TypeBadge';
+import { Sprite } from '../components/lookup/Sprite';
+import { PickerModal } from '../components/team/PickerModal';
+import { Analysis } from '../components/team/Analysis';
+import type { SlimCreature } from '../types/pokemon';
 
+type Layout = 'horizontal' | 'grid' | 'sidebar';
+
+// ── Team Slot ─────────────────────────────────────────────────────────────────
+function TeamSlotCard({ index, creature, onAdd, onRemove, onSelect }: {
+  index: number;
+  creature: SlimCreature | null;
+  onAdd: () => void;
+  onRemove: () => void;
+  onSelect: (c: SlimCreature) => void;
+}) {
+  if (!creature) {
+    return (
+      <button className="team-slot empty" onClick={onAdd} aria-label={`Add Pokémon to slot ${index + 1}`}>
+        <span className="plus">+</span>
+        <span className="ts-label">slot {index + 1}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--fg-3)' }}>click to pick</span>
+      </button>
+    );
+  }
+  const tint = TYPE_HEX[creature.types[0]] ?? '#666';
+  return (
+    <div
+      className="team-slot filled"
+      style={{ '--card-tint': tint } as React.CSSProperties}
+      onClick={() => onSelect(creature)}
+    >
+      <div className="slot-id">#{String(creature.id).padStart(3, '0')}</div>
+      <button className="slot-x" aria-label="Remove" onClick={(e) => { e.stopPropagation(); onRemove(); }}>×</button>
+      <div className="slot-art">
+        <Sprite id={creature.id} kind="official" />
+      </div>
+      <div>
+        <div className="slot-name">{creature.name.replace(/-/g, ' ')}</div>
+        <div className="slot-types">
+          {creature.types.map((t) => <TypeBadge key={t} type={t} size="sm" />)}
+        </div>
+      </div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--fg-3)', textAlign: 'center', marginTop: 8 }}>
+        BST {creature.bst} · SPE {creature.stats.speed}
+      </div>
+    </div>
+  );
+}
+
+// ── TeamPage ──────────────────────────────────────────────────────────────────
 export function TeamPage() {
-  const team = useTeamStore((s) => s.team);
-  const teamCount = team.filter(Boolean).length;
+  const team = useTeam();
+  const { teamIds, teamName, addById, removeById, clearTeam, randomizeIds, setTeamIds, setTeamName } = useTeamStore();
+  const teamIdSet = useMemo(() => new Set(teamIds), [teamIds]);
+  const creatures = useDexStore((s) => s.creatures);
+  const showToast = useToastStore((s) => s.showToast);
+  const navigate = useNavigate();
+
+  const [layout, setLayout] = useState<Layout>('horizontal');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSlot, setPickerSlot] = useState(0);
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  useEffect(() => {
+    document.title = `${teamName} — Pokémon Look Up`;
+  }, [teamName]);
+
+  const slots: (SlimCreature | null)[] = useMemo(() => {
+    const s: (SlimCreature | null)[] = [];
+    for (let i = 0; i < 6; i++) s.push(team[i] ?? null);
+    return s;
+  }, [team]);
+
+  function removeAt(i: number) {
+    const creature = slots[i];
+    if (!creature) return;
+    removeById(creature.id);
+    showToast(
+      `Removed ${creature.name.replace(/-/g, ' ')}`,
+      { label: 'Undo', fn: () => addById(creature.id) }
+    );
+  }
+
+  function handleRandomize() {
+    if (creatures.length === 0) return;
+    randomizeIds(creatures.map((c) => c.id));
+  }
+
+  function handleExport() {
+    const blocks = team.map((c) => {
+      const abilityObj = c.abilities.find((a) => !a.hidden) ?? c.abilities[0];
+      const abilityName = abilityObj
+        ? abilityObj.name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        : 'No Ability';
+      const showdownName = c.name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+      return [showdownName, `Ability: ${abilityName}`, '- Move 1', '- Move 2', '- Move 3', '- Move 4'].join('\n');
+    });
+    navigator.clipboard.writeText(blocks.join('\n\n'));
+    showToast('Showdown format copied to clipboard');
+  }
+
+  function openPicker(slot: number) {
+    setPickerSlot(slot);
+    setPickerOpen(true);
+  }
+
+  function pickIntoSlot(c: SlimCreature) {
+    if (teamIdSet.has(c.id)) { showToast('already in team'); return; }
+    const next = [...teamIds];
+    next[pickerSlot] = c.id;
+    setTeamIds(next.filter(Boolean) as number[]);
+    setPickerOpen(false);
+    showToast(`+ ${c.name}`);
+  }
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8 px-4 min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-      <div className="text-center">
-        <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">My Team</h1>
-        <p className="text-slate-400 dark:text-slate-500 mt-1">Build your team and analyze its strengths</p>
+    <div className="team-screen">
+      <div className="team-header">
+        <div className="team-title">
+          <span style={{ fontFamily: 'var(--font-pixel)', fontSize: 12, color: 'var(--accent-text)' }}>TEAM ▸</span>
+          <input
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
+            placeholder="Team name"
+            aria-label="Team name"
+          />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg-3)', fontWeight: 500 }}>
+            {team.length}/6
+          </span>
+        </div>
+        <div className="team-actions">
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {(['horizontal', 'grid', 'sidebar'] as Layout[]).map((l) => (
+              <button
+                key={l}
+                className="btn btn-ghost"
+                style={{ opacity: layout === l ? 1 : 0.5, padding: '4px 8px', fontSize: 11 }}
+                aria-pressed={layout === l}
+                onClick={() => setLayout(l)}
+              >{l}</button>
+            ))}
+          </div>
+          <button className="btn btn-ghost" onClick={handleRandomize}>↺ Randomize</button>
+          <button className="btn btn-ghost" onClick={handleExport} disabled={team.length === 0}>↗ Showdown</button>
+          {confirmClear ? (
+            <>
+              <button
+                className="btn"
+                style={{ color: 'var(--accent-hot)', borderColor: 'var(--accent-hot)' }}
+                onClick={() => { clearTeam(); setConfirmClear(false); }}
+              >Confirm clear</button>
+              <button className="btn btn-ghost" onClick={() => setConfirmClear(false)}>Cancel</button>
+            </>
+          ) : (
+            <button className="btn btn-ghost" onClick={() => setConfirmClear(true)} disabled={team.length === 0}>× Clear</button>
+          )}
+        </div>
       </div>
 
-      <div className="w-full max-w-2xl flex flex-col gap-6">
-        <TeamGrid team={team} />
+      {layout === 'horizontal' && (
+        <div className="team-bar">
+          {slots.map((c, i) => (
+            <TeamSlotCard
+              key={i}
+              index={i}
+              creature={c}
+              onAdd={() => openPicker(i)}
+              onRemove={() => removeAt(i)}
+              onSelect={(cr) => navigate(`/detail/${cr.id}`)}
+            />
+          ))}
+        </div>
+      )}
 
-        {teamCount === 0 && (
-          <div className="text-center py-10 text-slate-400 dark:text-slate-500">
-            <p className="text-5xl mb-3">🎯</p>
-            <p className="font-medium">Your team is empty.</p>
-            <Link
-              to="/"
-              className="inline-block mt-3 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl transition-colors text-sm"
-            >
-              Search for Pokémon →
-            </Link>
+      {layout === 'grid' && (
+        <div className="team-grid-2x3">
+          {slots.map((c, i) => (
+            <TeamSlotCard
+              key={i}
+              index={i}
+              creature={c}
+              onAdd={() => openPicker(i)}
+              onRemove={() => removeAt(i)}
+              onSelect={(cr) => navigate(`/detail/${cr.id}`)}
+            />
+          ))}
+        </div>
+      )}
+
+      {layout === 'sidebar' && (
+        <div className="team-with-sidebar">
+          <div className="team-sidebar-list">
+            {slots.map((c, i) => (
+              <div
+                key={i}
+                className={`ts-slot${c ? ' filled' : ''}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => c ? navigate(`/detail/${c.id}`) : openPicker(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (c) navigate(`/detail/${c.id}`);
+                    else openPicker(i);
+                  }
+                }}
+                aria-label={c ? `View ${c.name.replace(/-/g, ' ')}` : `Pick Pokémon for slot ${i + 1}`}
+                style={c ? { '--card-tint': TYPE_HEX[c.types[0]] } as React.CSSProperties : undefined}
+              >
+                <div className="num">{i + 1}</div>
+                {c ? (
+                  <>
+                    <Sprite id={c.id} kind="pixel" />
+                    <div style={{ minWidth: 0 }}>
+                      <div className="nm">{c.name.replace(/-/g, ' ')}</div>
+                      <div className="tts">{c.types.map((t) => <TypeBadge key={t} type={t} size="sm" />)}</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ width: 40, height: 40, display: 'grid', placeItems: 'center', color: 'var(--fg-3)' }}>+</div>
+                    <div className="nm" style={{ color: 'var(--fg-3)' }}>Empty slot</div>
+                  </>
+                )}
+                {c && (
+                  <button
+                    className="icon-btn"
+                    aria-label={`Remove ${c.name.replace(/-/g, ' ')}`}
+                    onClick={(e) => { e.stopPropagation(); removeAt(i); }}
+                    style={{ width: 30, height: 30 }}
+                  >×</button>
+                )}
+              </div>
+            ))}
           </div>
-        )}
+          <div><Analysis /></div>
+        </div>
+      )}
 
-        {teamCount > 0 && (
-          <div className="border-t border-slate-200 dark:border-slate-700 pt-2">
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-3">Team Analysis</h2>
-            <div className="flex flex-col gap-4">
-              <TeamStatChart team={team} />
-              <TypeCoveragePanel />
+      {layout !== 'sidebar' && (
+        team.length > 0
+          ? <Analysis />
+          : (
+            <div className="panel" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontFamily: 'var(--font-pixel)', fontSize: 24, color: 'var(--accent-text)', marginBottom: 12 }}>
+                NO TEAM YET
+              </div>
+              <div style={{ color: 'var(--fg-2)', marginBottom: 18, maxWidth: 420, margin: '0 auto 18px' }}>
+                Add Pokémon to see type coverage, role distribution, speed tiers, and synergy notes.
+              </div>
+              <button className="btn btn-primary" onClick={() => openPicker(0)}>+ Add first Pokémon</button>
             </div>
-          </div>
-        )}
-      </div>
+          )
+      )}
+
+      {pickerOpen && (
+        <PickerModal
+          creatures={creatures}
+          teamIds={teamIdSet}
+          onPick={pickIntoSlot}
+          onClose={() => setPickerOpen(false)}
+          slotNum={pickerSlot + 1}
+        />
+      )}
     </div>
   );
 }

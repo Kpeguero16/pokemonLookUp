@@ -1,39 +1,51 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Pokemon, Team } from '../types/pokemon';
 
 interface TeamStore {
-  team: Team;
-  addPokemon: (pokemon: Pokemon) => void;
-  removePokemon: (id: number) => void;
+  teamIds: number[];
+  teamName: string;
+  addById: (id: number) => void;
+  removeById: (id: number) => void;
   clearTeam: () => void;
+  setTeamIds: (ids: number[]) => void;
+  randomizeIds: (allIds: number[]) => void;
+  setTeamName: (name: string) => void;
 }
-
-const EMPTY_TEAM: Team = [null, null, null, null, null, null];
 
 export const useTeamStore = create<TeamStore>()(
   persist(
     (set) => ({
-      team: [...EMPTY_TEAM] as Team,
+      teamIds: [],
+      teamName: 'Untitled Squad',
 
-      addPokemon: (pokemon) =>
+      addById: (id) =>
         set((state) => {
-          const firstEmpty = state.team.findIndex((slot) => slot === null);
-          if (firstEmpty === -1) return state; // team is full
-          const newTeam = [...state.team] as Team;
-          newTeam[firstEmpty] = pokemon;
-          return { team: newTeam };
+          if (state.teamIds.includes(id)) return state;
+          if (state.teamIds.length >= 6) return state;
+          return { teamIds: [...state.teamIds, id] };
         }),
 
-      removePokemon: (id) =>
+      removeById: (id) =>
         set((state) => ({
-          team: state.team.map((slot) => (slot?.id === id ? null : slot)) as Team,
+          teamIds: state.teamIds.filter((tid) => tid !== id),
         })),
 
-      clearTeam: () => set({ team: [...EMPTY_TEAM] as Team }),
+      clearTeam: () => set({ teamIds: [] }),
+
+      setTeamIds: (ids) => set({ teamIds: ids.slice(0, 6) }),
+
+      randomizeIds: (allIds) => {
+        const pool = [...allIds];
+        const next: number[] = [];
+        while (next.length < 6 && pool.length > 0) {
+          const idx = Math.floor(Math.random() * pool.length);
+          next.push(pool.splice(idx, 1)[0]);
+        }
+        set({ teamIds: next });
+      },
+
+      setTeamName: (name) => set({ teamName: name }),
     }),
-    {
-      name: 'pokemon-team', // localStorage key
-    }
+    { name: 'pokemon-team' }
   )
 );

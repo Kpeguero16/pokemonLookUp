@@ -1,59 +1,89 @@
-// All 18 Pokemon types
 export type PokemonTypeName =
   | 'normal' | 'fire' | 'water' | 'electric' | 'grass'
   | 'ice' | 'fighting' | 'poison' | 'ground' | 'flying'
   | 'psychic' | 'bug' | 'rock' | 'ghost' | 'dragon'
   | 'dark' | 'steel' | 'fairy';
 
-// Raw PokeAPI response shapes
+/** Slim creature loaded in bulk for the dex grid */
+export interface SlimCreature {
+  id: number;
+  name: string;
+  types: PokemonTypeName[];
+  stats: {
+    hp: number;
+    attack: number;
+    defense: number;
+    specialAttack: number;
+    specialDefense: number;
+    speed: number;
+  };
+  bst: number;
+  height: number;
+  weight: number;
+  abilities: { name: string; hidden: boolean }[];
+  moveCount: number;
+  speciesUrl: string;
+}
+
+/** Evolution chain node */
+export interface EvoNode {
+  name: string;
+  id: number | null;
+  trigger: string | null;
+  depth: number;
+}
+
+/** Species data fetched on the detail page */
+export interface SpeciesData {
+  captureRate: number | null;
+  flavorText: string;
+  evolutionChainUrl: string | null;
+  eggGroups: string[];
+}
+
+/** Move data for the move pool preview */
+export interface MoveEntry {
+  name: string;
+  url: string;
+  lvl: number;
+  type?: string;
+  power?: number | null;
+  accuracy?: number | null;
+  pp?: number | null;
+  klass?: string;
+}
+
+// Raw PokeAPI shapes used in lib/pokeapi.ts
 export interface PokeAPIStat {
   base_stat: number;
-  stat: { name: string; url: string };
+  stat: { name: string };
 }
-
 export interface PokeAPIType {
   slot: number;
-  type: { name: PokemonTypeName; url: string };
+  type: { name: string };
 }
-
-export interface PokeAPISprites {
-  front_default: string | null;
-  front_shiny: string | null;
+export interface PokeAPIAbility {
+  ability: { name: string; url: string };
+  is_hidden: boolean;
 }
-
+export interface PokeAPIMove {
+  move: { name: string; url: string };
+  version_group_details: { level_learned_at: number; move_learn_method: { name: string } }[];
+}
 export interface PokeAPIResponse {
   id: number;
   name: string;
-  sprites: PokeAPISprites;
+  sprites: { front_default: string | null; front_shiny: string | null };
   stats: PokeAPIStat[];
   types: PokeAPIType[];
+  abilities: PokeAPIAbility[];
+  moves: PokeAPIMove[];
+  height: number;
+  weight: number;
+  species: { url: string };
 }
 
-// Normalized app-internal shape
-export interface PokemonStats {
-  hp: number;
-  attack: number;
-  defense: number;
-  specialAttack: number;
-  specialDefense: number;
-  speed: number;
-}
-
-export interface Pokemon {
-  id: number;
-  name: string;
-  defaultSprite: string | null;
-  shinySprite: string | null;
-  types: PokemonTypeName[];
-  stats: PokemonStats;
-}
-
-// Team: exactly 6 slots enforced at compile time
-export type TeamSlot = Pokemon | null;
+// Team: 6 slots stored as IDs, resolved against dex store
+export type TeamSlot = SlimCreature | null;
 export type Team = [TeamSlot, TeamSlot, TeamSlot, TeamSlot, TeamSlot, TeamSlot];
 
-// Team analysis output
-export interface TeamAnalysis {
-  offensiveCoverage: Record<PokemonTypeName, number>;  // max effectiveness your team can hit each defending type
-  defensiveExposure: Record<PokemonTypeName, number>;  // avg multiplier your team receives from each attacking type
-}

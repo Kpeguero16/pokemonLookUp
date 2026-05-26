@@ -2,28 +2,27 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface ThemeStore {
-  isDark: boolean;
+  theme: 'dark' | 'light';
   toggleDark: () => void;
 }
 
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      isDark: false,
+      theme: 'light',
+
       toggleDark: () =>
         set((state) => {
-          const next = !state.isDark;
-          // Keep the <html> class in sync whenever the store changes
-          document.documentElement.classList.toggle('dark', next);
-          return { isDark: next };
+          const next = state.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          return { theme: next };
         }),
     }),
     { name: 'pokemon-theme' }
   )
 );
 
-/** Call once at app startup to sync the class with the persisted value */
 export function initTheme() {
-  const isDark = useThemeStore.getState().isDark;
-  document.documentElement.classList.toggle('dark', isDark);
+  const { theme } = useThemeStore.getState();
+  document.documentElement.setAttribute('data-theme', theme ?? 'light');
 }
