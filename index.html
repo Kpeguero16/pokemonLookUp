@@ -1,63 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Pokémon Look up</title>
-</head>
-
-<!--
-TO-DO:
--If the api request is undefined then print out a message 
--Add text saying a shiny does not exist when pokemon.shinySprite is null
--Add compare pokemon function
--->
-
-
-<body>
-    <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg">
-    </div>
-
-    <div class="inputs">
-        <label for="pokemonName"></label><input type="text" id="pokemonName" name="pokemonName" placeholder="Name or #">
-    </div>
-
-    <div>
-        <button id="backwards"><</button>
-        <button id="search">Search</button>
-        <button id="forwards">></button>
-    </div>
-    <div>
-        <button id="randomize">Randomize</button>
-    </div>
-
-    <div class="Pkmn_name">
-        <h1 id="name_en">Name</h1>
-        <h3 id="dex_number">Id</h3>
-        <h3 id="types">Type(s)</h3>
-    </div>
-
-    <div class="info">
-        <div class="pokemonImage border">
-            <img id="defaultSprite" class="easterEgg" src="resources/not_found.png">
-        </div>
-        <div>
-            <canvas id="myChart" class="border"></canvas>
-        </div>
-        <div class="pokemonImage border">
-            <img id="shinySprite" class="easterEgg" src="resources/not_found.png">
-        </div> 
-    </div>
-    <div class="moreInfo">
-        <div>
-            <button id="moreInfo">More Info</button>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
-</body>
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pokemonLookUp/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokémon Look Up — Dex & Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"></noscript>
+    <script>
+      try {
+        const stored = JSON.parse(localStorage.getItem('pokemon-theme') || '{}');
+        const theme = stored?.state?.theme || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
+    <script type="module" crossorigin src="/pokemonLookUp/assets/index-BNsRj-sU.js"></script>
+    <link rel="stylesheet" crossorigin href="/pokemonLookUp/assets/index-MXO2PPHc.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>
