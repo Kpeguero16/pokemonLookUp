@@ -15,7 +15,7 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
   const fallbackSrc = '/pokemonLookUp/not_found.png';
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 w-full max-w-lg flex flex-col items-center gap-4 transition-colors duration-200">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 sm:p-6 w-full max-w-lg flex flex-col items-center gap-4 transition-colors duration-200">
       {/* Header */}
       <div className="text-center">
         <p className="text-slate-400 dark:text-slate-500 text-sm font-mono">#{String(pokemon.id).padStart(4, '0')}</p>
@@ -23,19 +23,19 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
       </div>
 
       {/* Types */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap justify-center">
         {pokemon.types.map((type) => (
           <TypeBadge key={type} type={type} />
         ))}
       </div>
 
-      {/* Sprites */}
-      <div className="flex gap-6 items-end">
+      {/* Sprites — smaller on mobile so both fit without overflowing */}
+      <div className="flex gap-4 sm:gap-6 items-end">
         <div className="flex flex-col items-center gap-1">
           <img
             src={pokemon.defaultSprite ?? fallbackSrc}
             alt={`${pokemon.name} default sprite`}
-            className="w-32 h-32 object-contain image-pixelated hover:-scale-x-100 transition-transform duration-200 cursor-pointer"
+            className="w-24 h-24 sm:w-32 sm:h-32 object-contain image-pixelated hover:-scale-x-100 active:-scale-x-100 transition-transform duration-200 cursor-pointer"
             onError={(e) => { (e.target as HTMLImageElement).src = fallbackSrc; }}
           />
           <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Default</span>
@@ -46,12 +46,12 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
             <img
               src={pokemon.shinySprite}
               alt={`${pokemon.name} shiny sprite`}
-              className="w-32 h-32 object-contain image-pixelated hover:-scale-x-100 transition-transform duration-200 cursor-pointer"
+              className="w-24 h-24 sm:w-32 sm:h-32 object-contain image-pixelated hover:-scale-x-100 active:-scale-x-100 transition-transform duration-200 cursor-pointer"
               onError={(e) => { (e.target as HTMLImageElement).src = fallbackSrc; }}
             />
           ) : (
-            <div className="w-32 h-32 flex items-center justify-center bg-slate-50 dark:bg-slate-700 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-600">
-              <span className="text-slate-400 dark:text-slate-500 text-xs text-center">No shiny sprite</span>
+            <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center bg-slate-50 dark:bg-slate-700 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-600">
+              <span className="text-slate-400 dark:text-slate-500 text-xs text-center px-1">No shiny sprite</span>
             </div>
           )}
           <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">✨ Shiny</span>

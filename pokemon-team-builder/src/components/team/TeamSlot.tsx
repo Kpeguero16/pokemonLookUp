@@ -26,11 +26,22 @@ export function TeamSlot({ pokemon, slotIndex }: TeamSlotProps) {
 
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-sm relative group transition-colors duration-200">
-      {/* Remove button */}
+      {/* Remove button — always visible on touch devices, hover-only on desktop */}
       <button
         onClick={() => removePokemon(pokemon.id)}
-        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-        title="Remove from team"
+        aria-label={`Remove ${pokemon.name} from team`}
+        className={[
+          'absolute top-2 right-2',
+          // Large touch target on mobile, smaller on desktop
+          'w-8 h-8 sm:w-6 sm:h-6',
+          'flex items-center justify-center text-xs',
+          'rounded-full transition-colors',
+          // Always visible on mobile (no hover state on touch), hover-reveal on desktop
+          'opacity-100 sm:opacity-0 sm:group-hover:opacity-100',
+          'text-slate-400 dark:text-slate-500',
+          'hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30',
+          'active:bg-red-100 dark:active:bg-red-900/50',
+        ].join(' ')}
       >
         ✕
       </button>
@@ -39,7 +50,7 @@ export function TeamSlot({ pokemon, slotIndex }: TeamSlotProps) {
       <img
         src={pokemon.defaultSprite ?? fallbackSrc}
         alt={pokemon.name}
-        className="w-20 h-20 object-contain image-pixelated hover:-scale-x-100 transition-transform duration-200"
+        className="w-16 h-16 sm:w-20 sm:h-20 object-contain image-pixelated hover:-scale-x-100 transition-transform duration-200"
         onError={(e) => { (e.target as HTMLImageElement).src = fallbackSrc; }}
       />
 

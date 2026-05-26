@@ -48,18 +48,19 @@ function CoverageChart({
   description: string;
   isDark: boolean;
 }) {
-  const axisColor    = isDark ? '#64748b' : '#94a3b8';
-  const refColor     = isDark ? '#475569' : '#94a3b8';
-  const tooltipBg    = isDark ? '#1e293b' : '#ffffff';
-  const tooltipText  = isDark ? '#e2e8f0' : '#1e293b';
+  const axisColor     = isDark ? '#64748b' : '#94a3b8';
+  const refColor      = isDark ? '#475569' : '#94a3b8';
+  const tooltipBg     = isDark ? '#1e293b' : '#ffffff';
+  const tooltipText   = isDark ? '#e2e8f0' : '#1e293b';
   const tooltipBorder = isDark ? '#334155' : '#e2e8f0';
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 w-full transition-colors duration-200">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-5 w-full transition-colors duration-200">
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wide">{title}</h3>
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">{description}</p>
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 5, right: 5, bottom: 40, left: -20 }}>
+      {/* Taller chart + more bottom room for angled labels; left:0 prevents y-axis clipping on narrow screens */}
+      <ResponsiveContainer width="100%" height={270}>
+        <BarChart data={data} margin={{ top: 5, right: 5, bottom: 60, left: 0 }}>
           <XAxis
             dataKey="type"
             tick={{ fontSize: 10, fill: axisColor }}
@@ -67,7 +68,10 @@ function CoverageChart({
             textAnchor="end"
             interval={0}
           />
-          <YAxis tick={{ fontSize: 10, fill: axisColor }} />
+          <YAxis
+            tick={{ fontSize: 10, fill: axisColor }}
+            width={28}
+          />
           <Tooltip
             formatter={(v) => [`${v}×`, 'Multiplier']}
             contentStyle={{
