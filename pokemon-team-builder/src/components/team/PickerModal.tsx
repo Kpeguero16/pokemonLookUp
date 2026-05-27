@@ -80,7 +80,10 @@ export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: Pi
           {formTarget ? (
             <FormPickerModal
               creature={formTarget}
-              onPickForm={(base, formName, formCreature) => onPick(base, formName, formCreature)}
+              onPickForm={(base, formName, formCreature) => {
+                onPick(base, formName, formCreature);
+                onClose(); // ensure modal closes regardless of async timing in the form fetch chain
+              }}
               onBack={() => setFormTarget(null)}
             />
           ) : (
