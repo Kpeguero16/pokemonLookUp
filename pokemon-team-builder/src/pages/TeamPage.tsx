@@ -85,10 +85,13 @@ export function TeamPage() {
   function removeAt(i: number) {
     const creature = slots[i];
     if (!creature) return;
-    removeById(creature.id);
+    // Use the base dex ID (teamIds[i]) — form creatures have PokeAPI IDs like
+    // 10034 that don't exist in teamIds, so removeById(creature.id) would be a no-op.
+    const baseId = teamIds[i] ?? creature.id;
+    removeById(baseId);
     showToast(
       `Removed ${creature.name.replace(/-/g, ' ')}`,
-      { label: 'Undo', fn: () => addById(creature.id) }
+      { label: 'Undo', fn: () => addById(baseId) }
     );
   }
 
