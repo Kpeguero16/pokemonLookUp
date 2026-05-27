@@ -207,7 +207,7 @@ export async function fetchMovesDB(limit = 400): Promise<{ name: string; url: st
 export async function fetchMoveDetail(name: string): Promise<{
   name: string; type: string; klass: string;
   power: number | null; accuracy: number | null; pp: number | null;
-  priority: number; effect: string;
+  priority: number; generation: string; effect: string;
 }> {
   const d = await fetchJSON<{
     name: string;
@@ -217,6 +217,7 @@ export async function fetchMoveDetail(name: string): Promise<{
     accuracy: number | null;
     pp: number | null;
     priority: number;
+    generation: { name: string };
     effect_entries: { short_effect: string; language: { name: string } }[];
   }>(`${BASE}/move/${name}`);
   return {
@@ -227,8 +228,60 @@ export async function fetchMoveDetail(name: string): Promise<{
     accuracy: d.accuracy,
     pp: d.pp,
     priority: d.priority,
+    generation: d.generation.name.replace('generation-', '').toUpperCase(),
     effect: d.effect_entries.find((e) => e.language.name === 'en')?.short_effect ?? '',
   };
+}
+
+export async function fetchPokemonMoveSections(creatureId: number): Promise<{
+  levelUp: MoveEntry[];
+  tm: MoveEntry[];
+  egg: MoveEntry[];
+  tutor: MoveEntry[];
+}> {
+  const raw = await fetchJSON<PokeAPIResponse>(`${BASE}/pokemon/${creatureId}`);
+
+  async function resolveDetails(items: { name: string; url: string; lvl: number }[]): Promise<MoveEntry[]> {
+    const results = await concurrentMap(items, async (m): Promise<MoveEntry | null> => {
+      try {
+        const d = await fetchJSON<{
+          type: { name: string };
+          power: number | null;
+          accuracy: number | null;
+          pp: number | null;
+          damage_class: { name: string };
+        }>(`${BASE}/move/${m.name}`);
+        return { ...m, type: d.type.name, power: d.power, accuracy: d.accuracy, pp: d.pp, klass: d.damage_class.name };
+      } catch { return null; }
+    }, 16);
+    return results.filter(Boolean) as MoveEntry[];
+  }
+
+  const levelUpItems = raw.moves
+    .map((m) => {
+      const lvls = m.version_group_details
+        .filter((v) => v.move_learn_method.name === 'level-up')
+        .map((v) => v.level_learned_at)
+        .filter((l) => l > 0);
+      return { name: m.move.name, url: m.move.url, lvl: lvls.length ? Math.min(...lvls) : null };
+    })
+    .filter((m): m is { name: string; url: string; lvl: number } => m.lvl !== null)
+    .sort((a, b) => a.lvl - b.lvl);
+
+  function byMethod(method: string) {
+    return raw.moves
+      .filter((m) => m.version_group_details.some((v) => v.move_learn_method.name === method))
+      .map((m) => ({ name: m.move.name, url: m.move.url, lvl: 0 }));
+  }
+
+  const [levelUp, tm, egg, tutor] = await Promise.all([
+    resolveDetails(levelUpItems),
+    resolveDetails(byMethod('machine')),
+    resolveDetails(byMethod('egg')),
+    resolveDetails(byMethod('tutor')),
+  ]);
+
+  return { levelUp, tm, egg, tutor };
 }
 
 export async function fetchAbilitiesDB(limit = 300): Promise<{ name: string; url: string }[]> {

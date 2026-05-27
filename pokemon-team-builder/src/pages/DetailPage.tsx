@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDexStore } from '../store/dexStore';
 import { useTeamStore } from '../store/teamStore';
 import { useToastStore } from '../store/toastStore';
-import { fetchSpecies, fetchEvolutionChain, fetchLevelUpMoves } from '../lib/pokeapi';
+import { fetchSpecies, fetchEvolutionChain, fetchAbilityDetail, fetchPokemonMoveSections } from '../lib/pokeapi';
 import { defensiveProfileExport } from '../hooks/useTeamAnalysis';
 import { generationOf } from '../utils/format';
 import { ALL_TYPES } from '../constants/typeChart';
@@ -25,16 +25,26 @@ function MatchupPill({ type, mult }: { type: PokemonTypeName; mult: number }) {
   );
 }
 
+type MoveTab = 'levelUp' | 'tm' | 'egg' | 'tutor';
+const MOVE_TAB_LABELS: Record<MoveTab, string> = {
+  levelUp: 'Level Up', tm: 'TM / HM', egg: 'Egg', tutor: 'Tutor',
+};
+
 function MovePoolPreview({ creature }: { creature: SlimCreature }) {
-  const [moves, setMoves] = useState<MoveEntry[]>([]);
+  const [sections, setSections] = useState<{
+    levelUp: MoveEntry[]; tm: MoveEntry[]; egg: MoveEntry[]; tutor: MoveEntry[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<MoveTab>('levelUp');
 
   useEffect(() => {
     let cancel = false;
     setLoading(true);
-    fetchLevelUpMoves(creature.id)
-      .then((m) => { if (!cancel) setMoves(m); })
-      .catch(() => { if (!cancel) setMoves([]); })
+    setSections(null);
+    setTab('levelUp');
+    fetchPokemonMoveSections(creature.id)
+      .then((s) => { if (!cancel) setSections(s); })
+      .catch(() => { if (!cancel) setSections({ levelUp: [], tm: [], egg: [], tutor: [] }); })
       .finally(() => { if (!cancel) setLoading(false); });
     return () => { cancel = true; };
   }, [creature.id]);
@@ -48,32 +58,64 @@ function MovePoolPreview({ creature }: { creature: SlimCreature }) {
       </div>
     );
   }
-  if (moves.length === 0) return <div className="empty-state">No level-up moves found.</div>;
+
+  const moves = sections?.[tab] ?? [];
 
   return (
-    <div className="move-table">
-      <div className="mh">Move</div>
-      <div className="mh">Type</div>
-      <div className="mh">Class</div>
-      <div className="mh">Pow</div>
-      <div className="mh">Acc</div>
-      <div className="mh">PP</div>
-      {moves.map((m) => (
-        <Fragment key={m.name}>
-          <div className="mc mc-name">Lv {m.lvl} · {m.name.replace(/-/g, ' ')}</div>
-          <div className="mc">
-            {m.type && <TypeBadge type={m.type as PokemonTypeName} size="sm" />}
+    <div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+        {(['levelUp', 'tm', 'egg', 'tutor'] as MoveTab[]).map((t) => (
+          <button
+            key={t}
+            className="btn btn-ghost"
+            style={{
+              fontSize: 11, padding: '3px 10px',
+              opacity: tab === t ? 1 : 0.5,
+              borderColor: tab === t ? 'var(--accent)' : undefined,
+              color: tab === t ? 'var(--accent)' : undefined,
+            }}
+            onClick={() => setTab(t)}
+          >
+            {MOVE_TAB_LABELS[t]}
+            {sections && (
+              <span style={{ marginLeft: 5, color: 'var(--fg-3)', fontWeight: 400 }}>
+                ({sections[t].length})
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      {moves.length === 0
+        ? <div className="empty-state">No {MOVE_TAB_LABELS[tab].toLowerCase()} moves.</div>
+        : (
+          <div className="move-table">
+            <div className="mh">Move</div>
+            <div className="mh">Type</div>
+            <div className="mh">Class</div>
+            <div className="mh">Pow</div>
+            <div className="mh">Acc</div>
+            <div className="mh">PP</div>
+            {moves.map((m) => (
+              <Fragment key={m.name}>
+                <div className="mc mc-name">
+                  {tab === 'levelUp' && `Lv ${m.lvl} · `}{m.name.replace(/-/g, ' ')}
+                </div>
+                <div className="mc">
+                  {m.type && <TypeBadge type={m.type as PokemonTypeName} size="sm" />}
+                </div>
+                <div className="mc mc-class">
+                  <span className={`cls-${m.klass ?? 'status'}`}>
+                    {(m.klass ?? 'sta').slice(0, 3).toUpperCase()}
+                  </span>
+                </div>
+                <div className="mc">{m.power ?? '—'}</div>
+                <div className="mc mc-acc">{m.accuracy ?? '—'}</div>
+                <div className="mc mc-pp">{m.pp ?? '—'}</div>
+              </Fragment>
+            ))}
           </div>
-          <div className="mc mc-class">
-            <span className={`cls-${m.klass ?? 'status'}`}>
-              {(m.klass ?? 'sta').slice(0, 3).toUpperCase()}
-            </span>
-          </div>
-          <div className="mc">{m.power ?? '—'}</div>
-          <div className="mc mc-acc">{m.accuracy ?? '—'}</div>
-          <div className="mc mc-pp">{m.pp ?? '—'}</div>
-        </Fragment>
-      ))}
+        )
+      }
     </div>
   );
 }
@@ -90,6 +132,7 @@ export function DetailPage() {
   const [species, setSpecies] = useState<SpeciesData | null>(null);
   const [evoChain, setEvoChain] = useState<EvoNode[] | null>(null);
   const [flavor, setFlavor] = useState('');
+  const [abilityEffects, setAbilityEffects] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (creature) {
@@ -116,6 +159,26 @@ export function DetailPage() {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only re-fetch when the pokemon id changes, speciesUrl is stable per id
+  }, [creature?.id]);
+
+  useEffect(() => {
+    if (!creature) return;
+    let cancelled = false;
+    setAbilityEffects({});
+    (async () => {
+      const effects: Record<string, string> = {};
+      await Promise.all(
+        creature.abilities.map(async (a) => {
+          try {
+            const d = await fetchAbilityDetail(a.name);
+            effects[a.name] = d.effect;
+          } catch { /* non-critical */ }
+        })
+      );
+      if (!cancelled) setAbilityEffects(effects);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creature?.id]);
 
   const tint = creature ? (TYPE_HEX[creature.types[0]] ?? '#666') : '#666';
@@ -257,11 +320,25 @@ export function DetailPage() {
 
       <div className="section">
         <h3>Abilities</h3>
-        <div className="abilities-row">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {creature.abilities.map((a) => (
-            <div key={a.name} className="ability-chip">
-              {a.name.replace(/-/g, ' ')}
-              {a.hidden && <span className="hidden-tag">HIDDEN</span>}
+            <div
+              key={a.name}
+              style={{
+                background: 'var(--bg-2)', border: '1px solid var(--border)',
+                borderRadius: 10, padding: '10px 14px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: abilityEffects[a.name] ? 6 : 0 }}>
+                <span style={{ fontWeight: 600, fontSize: 13, textTransform: 'capitalize' }}>
+                  {a.name.replace(/-/g, ' ')}
+                </span>
+                {a.hidden && <span className="hidden-tag">HIDDEN</span>}
+              </div>
+              {abilityEffects[a.name]
+                ? <div style={{ fontSize: 12, color: 'var(--fg-2)', lineHeight: 1.6 }}>{abilityEffects[a.name]}</div>
+                : <div className="skeleton" style={{ height: 14, width: '70%', marginTop: 4 }} />
+              }
             </div>
           ))}
         </div>

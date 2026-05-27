@@ -5,7 +5,7 @@ import { fetchMovesDB, fetchMoveDetail, fetchAbilitiesDB, fetchAbilityDetail } f
 import { concurrentMap } from '../utils/concurrentMap';
 import type { PokemonTypeName } from '../types/pokemon';
 
-const MOVES_CACHE_KEY = 'dexmeta-moves-v1';
+const MOVES_CACHE_KEY = 'dexmeta-moves-v2';
 const ABILITIES_CACHE_KEY = 'dexmeta-abilities-v1';
 
 function saveToSession(key: string, data: unknown) {
@@ -29,8 +29,11 @@ interface MoveRow {
   power: number | null;
   accuracy: number | null;
   priority: number;
+  generation: string;
   effect: string;
 }
+
+const ALL_GENS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
 
 interface AbilityRow {
   name: string;
@@ -64,6 +67,7 @@ export function MovesPage() {
   }, [tab]);
   const [typeFilter, setTypeFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [genFilter, setGenFilter] = useState('');
   const [moves, setMoves] = useState<MoveRow[]>([]);
   const [abilities, setAbilities] = useState<AbilityRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +106,7 @@ export function MovesPage() {
             list,
             async (item): Promise<MoveRow | null> => {
               const d = await fetchMoveDetail(item.name);
-              return { name: d.name, type: d.type, klass: d.klass, power: d.power, accuracy: d.accuracy, priority: d.priority, effect: d.effect };
+              return { name: d.name, type: d.type, klass: d.klass, power: d.power, accuracy: d.accuracy, priority: d.priority, generation: d.generation, effect: d.effect };
             },
             20
           );
@@ -154,9 +158,10 @@ export function MovesPage() {
       if (ql && !m.name.includes(ql) && !m.effect.toLowerCase().includes(ql)) return false;
       if (typeFilter && m.type !== typeFilter) return false;
       if (classFilter && m.klass !== classFilter) return false;
+      if (genFilter && m.generation !== genFilter) return false;
       return true;
     });
-  }, [moves, q, typeFilter, classFilter]);
+  }, [moves, q, typeFilter, classFilter, genFilter]);
 
   const filteredAbilities = useMemo(() => {
     const ql = q.trim().toLowerCase();
@@ -199,6 +204,10 @@ export function MovesPage() {
               <option value="physical">Physical</option>
               <option value="special">Special</option>
               <option value="status">Status</option>
+            </select>
+            <select value={genFilter} onChange={(e) => setGenFilter(e.target.value)} className="dex-select">
+              <option value="">All gens</option>
+              {ALL_GENS.map((g) => <option key={g} value={g}>Gen {g}</option>)}
             </select>
           </>
         )}

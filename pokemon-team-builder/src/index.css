@@ -71,7 +71,7 @@
   --fg-mute: #b8b1d0;
   --accent-text: #7a4e00;
 
-  --accent: #ffb02e;
+  --accent: #884400;
   --accent-2: #2eb6c0;
   --accent-3: #e0418e;
   --accent-hot: #e85c2a;
@@ -532,6 +532,8 @@ input, select, textarea { font: inherit; color: inherit; }
 .btn:hover { background: var(--surface-hover); border-color: var(--fg-2); }
 .btn-primary { background: var(--accent); color: #1a1530; border-color: var(--accent); }
 .btn-primary:hover { background: color-mix(in oklab, var(--accent) 80%, white); }
+[data-theme="light"] .btn-primary { color: #f4f1e8; }
+[data-theme="light"] .btn-primary:hover { color: #1a1530; }
 .btn-ghost { background: transparent; border-color: var(--border); }
 .btn:disabled { opacity: .5; cursor: default; }
 
@@ -594,7 +596,7 @@ input, select, textarea { font: inherit; color: inherit; }
   text-transform: capitalize; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
 }
 .ability-chip:hover { border-color: var(--border-strong); }
-.ability-chip .hidden-tag {
+.hidden-tag {
   font-family: var(--font-mono); font-size: 9px; color: var(--accent);
   padding: 1px 4px; border: 1px solid var(--accent); border-radius: 3px;
 }
@@ -1181,7 +1183,8 @@ main#main-content { display: block; }
 .detail-art .pixel-strip { font-size: 11px; }
 .kv .k { font-size: 11px; }
 .matchup-cell .t-glyph { font-size: 10px; }
-.ability-chip .hidden-tag { font-size: 10px; }
+.hidden-tag { font-size: 10px; }
+[data-theme="light"] .hidden-tag { font-size: 10px; }
 .evo-node .eid { font-size: 11px; }
 .evo-arrow .trig { font-size: 10px; }
 .team-slot .slot-id { font-size: 11px; }
