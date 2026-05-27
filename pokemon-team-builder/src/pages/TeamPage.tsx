@@ -14,12 +14,14 @@ import type { SlimCreature } from '../types/pokemon';
 type Layout = 'horizontal' | 'grid' | 'sidebar';
 
 // ── Team Slot ─────────────────────────────────────────────────────────────────
-function TeamSlotCard({ index, creature, onAdd, onRemove, onSelect }: {
+function TeamSlotCard({ index, creature, baseId, onAdd, onRemove, onSelect }: {
   index: number;
   creature: SlimCreature | null;
+  /** Base dex ID (1-1025) — for display and navigation; may differ from creature.id for form creatures */
+  baseId?: number;
   onAdd: () => void;
   onRemove: () => void;
-  onSelect: (c: SlimCreature) => void;
+  onSelect: (c: SlimCreature, baseId: number) => void;
 }) {
   if (!creature) {
     return (
@@ -30,14 +32,15 @@ function TeamSlotCard({ index, creature, onAdd, onRemove, onSelect }: {
       </button>
     );
   }
+  const dexId = baseId ?? creature.id;
   const tint = TYPE_HEX[creature.types[0]] ?? '#666';
   return (
     <div
       className="team-slot filled"
       style={{ '--card-tint': tint } as React.CSSProperties}
-      onClick={() => onSelect(creature)}
+      onClick={() => onSelect(creature, dexId)}
     >
-      <div className="slot-id">#{String(creature.id).padStart(3, '0')}</div>
+      <div className="slot-id">#{String(dexId).padStart(3, '0')}</div>
       <button className="slot-x" aria-label="Remove" onClick={(e) => { e.stopPropagation(); onRemove(); }}>×</button>
       <div className="slot-art">
         <Sprite id={creature.id} kind="official" />
@@ -189,9 +192,10 @@ export function TeamPage() {
               key={i}
               index={i}
               creature={c}
+              baseId={teamIds[i]}
               onAdd={() => openPicker(i)}
               onRemove={() => removeAt(i)}
-              onSelect={(cr) => navigate(`/detail/${cr.id}`)}
+              onSelect={(_cr, dexId) => navigate(`/detail/${dexId}`)}
             />
           ))}
         </div>
@@ -204,9 +208,10 @@ export function TeamPage() {
               key={i}
               index={i}
               creature={c}
+              baseId={teamIds[i]}
               onAdd={() => openPicker(i)}
               onRemove={() => removeAt(i)}
-              onSelect={(cr) => navigate(`/detail/${cr.id}`)}
+              onSelect={(_cr, dexId) => navigate(`/detail/${dexId}`)}
             />
           ))}
         </div>
@@ -215,48 +220,51 @@ export function TeamPage() {
       {layout === 'sidebar' && (
         <div className="team-with-sidebar">
           <div className="team-sidebar-list">
-            {slots.map((c, i) => (
-              <div
-                key={i}
-                className={`ts-slot${c ? ' filled' : ''}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => c ? navigate(`/detail/${c.id}`) : openPicker(i)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    if (c) navigate(`/detail/${c.id}`);
-                    else openPicker(i);
-                  }
-                }}
-                aria-label={c ? `View ${c.name.replace(/-/g, ' ')}` : `Pick Pokémon for slot ${i + 1}`}
-                style={c ? { '--card-tint': TYPE_HEX[c.types[0]] } as React.CSSProperties : undefined}
-              >
-                <div className="num">{i + 1}</div>
-                {c ? (
-                  <>
-                    <Sprite id={c.id} kind="pixel" />
-                    <div style={{ minWidth: 0 }}>
-                      <div className="nm">{c.name.replace(/-/g, ' ')}</div>
-                      <div className="tts">{c.types.map((t) => <TypeBadge key={t} type={t} size="sm" />)}</div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ width: 40, height: 40, display: 'grid', placeItems: 'center', color: 'var(--fg-3)' }}>+</div>
-                    <div className="nm" style={{ color: 'var(--fg-3)' }}>Empty slot</div>
-                  </>
-                )}
-                {c && (
-                  <button
-                    className="icon-btn"
-                    aria-label={`Remove ${c.name.replace(/-/g, ' ')}`}
-                    onClick={(e) => { e.stopPropagation(); removeAt(i); }}
-                    style={{ width: 30, height: 30 }}
-                  >×</button>
-                )}
-              </div>
-            ))}
+            {slots.map((c, i) => {
+              const dexId = teamIds[i] ?? c?.id;
+              return (
+                <div
+                  key={i}
+                  className={`ts-slot${c ? ' filled' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => c ? navigate(`/detail/${dexId}`) : openPicker(i)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (c) navigate(`/detail/${dexId}`);
+                      else openPicker(i);
+                    }
+                  }}
+                  aria-label={c ? `View ${c.name.replace(/-/g, ' ')}` : `Pick Pokémon for slot ${i + 1}`}
+                  style={c ? { '--card-tint': TYPE_HEX[c.types[0]] } as React.CSSProperties : undefined}
+                >
+                  <div className="num">{i + 1}</div>
+                  {c ? (
+                    <>
+                      <Sprite id={c.id} kind="pixel" />
+                      <div style={{ minWidth: 0 }}>
+                        <div className="nm">{c.name.replace(/-/g, ' ')}</div>
+                        <div className="tts">{c.types.map((t) => <TypeBadge key={t} type={t} size="sm" />)}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ width: 40, height: 40, display: 'grid', placeItems: 'center', color: 'var(--fg-3)' }}>+</div>
+                      <div className="nm" style={{ color: 'var(--fg-3)' }}>Empty slot</div>
+                    </>
+                  )}
+                  {c && (
+                    <button
+                      className="icon-btn"
+                      aria-label={`Remove ${c.name.replace(/-/g, ' ')}`}
+                      onClick={(e) => { e.stopPropagation(); removeAt(i); }}
+                      style={{ width: 30, height: 30 }}
+                    >×</button>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <div><Analysis /></div>
         </div>
