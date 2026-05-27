@@ -800,7 +800,7 @@ input, select, textarea { font: inherit; color: inherit; }
 
 .moves-table { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .moves-table .row {
-  display: grid; grid-template-columns: 1fr 90px 70px 70px 70px 1fr;
+  display: grid; grid-template-columns: 1fr 90px 70px 60px 60px 60px 1.5fr;
   gap: 0; align-items: center; padding: 10px 14px;
   border-bottom: 1px solid var(--border-inset); font-family: var(--font-mono); font-size: 12px;
 }
