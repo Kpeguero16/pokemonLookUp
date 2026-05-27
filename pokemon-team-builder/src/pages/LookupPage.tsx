@@ -146,6 +146,15 @@ export function LookupPage() {
   }
 
   const activeFilterCount = typesOn.size + (bstMin > 0 ? 1 : 0) + (genFilter !== 'all' ? 1 : 0);
+  const hasActiveFilters = q.trim().length > 0 || typesOn.size > 0 || bstMin > 0 || genFilter !== 'all' || sort !== 'id';
+
+  function resetAllFilters() {
+    setQ('');
+    setTypesOn(new Set());
+    setBstMin(0);
+    setGenFilter('all');
+    setSort('id');
+  }
 
   return (
     <div className="dex">
@@ -227,6 +236,14 @@ export function LookupPage() {
             <option value="spe-desc">Speed (high→low)</option>
           </select>
         </div>
+
+        {hasActiveFilters && (
+          <button
+            className="reset-filters-btn"
+            onClick={resetAllFilters}
+            aria-label="Reset all filters"
+          >↺ Reset Filters</button>
+        )}
       </aside>
 
       <div className="dex-main">

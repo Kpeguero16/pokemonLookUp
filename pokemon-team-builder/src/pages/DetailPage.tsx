@@ -137,6 +137,7 @@ export function DetailPage() {
   useEffect(() => {
     if (creature) {
       document.title = `${creature.name.replace(/-/g, ' ')} — Pokémon Look Up`;
+      window.scrollTo(0, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: title only needs to update when the pokemon id changes, not on every store reference update
   }, [creature?.id]);

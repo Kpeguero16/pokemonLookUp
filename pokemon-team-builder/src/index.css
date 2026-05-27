@@ -327,6 +327,19 @@ input, select, textarea { font: inherit; color: inherit; }
   margin-bottom: 8px;
 }
 
+.reset-filters-btn {
+  margin-top: 8px;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
 .type-filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
 .type-filter-pill {
   padding: 5px 8px;
