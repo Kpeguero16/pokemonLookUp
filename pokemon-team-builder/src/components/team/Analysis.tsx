@@ -140,11 +140,6 @@ export function Analysis() {
                   );
                 })}
               </div>
-              <div className="speed-tier-marker">
-                <span>slow ≤60</span>
-                <span>fast ≥100</span>
-                <span>scarf ≥130</span>
-              </div>
             </>
           )}
         </div>

@@ -94,7 +94,7 @@ export function TeamPage() {
     randomizeIds(creatures.map((c) => c.id));
   }
 
-  function handleExport() {
+  async function handleExport() {
     const blocks = team.map((c) => {
       const abilityObj = c.abilities.find((a) => !a.hidden) ?? c.abilities[0];
       const abilityName = abilityObj
@@ -103,7 +103,18 @@ export function TeamPage() {
       const showdownName = c.name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
       return [showdownName, `Ability: ${abilityName}`, '- Move 1', '- Move 2', '- Move 3', '- Move 4'].join('\n');
     });
-    navigator.clipboard.writeText(blocks.join('\n\n'));
+    const text = blocks.join('\n\n');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
     showToast('Showdown format copied to clipboard');
   }
 
