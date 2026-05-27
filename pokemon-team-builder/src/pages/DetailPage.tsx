@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDexStore } from '../store/dexStore';
 import { useTeamStore } from '../store/teamStore';
 import { useToastStore } from '../store/toastStore';
-import { fetchSpecies, fetchEvolutionChain, fetchAbilityDetail, fetchPokemonMoveSections } from '../lib/pokeapi';
+import { fetchSpecies, fetchEvolutionChain, fetchAbilityDetail, fetchPokemonMoveSections, fetchSlimCreature } from '../lib/pokeapi';
 import { defensiveProfileExport } from '../hooks/useTeamAnalysis';
 import { generationOf } from '../utils/format';
 import { ALL_TYPES } from '../constants/typeChart';
@@ -11,7 +11,7 @@ import { TYPE_HEX } from '../constants/typeColors';
 import { TypeBadge } from '../components/layout/TypeBadge';
 import { Sprite } from '../components/lookup/Sprite';
 import { StatBars } from '../components/lookup/StatBars';
-import type { SlimCreature, PokemonTypeName, SpeciesData, EvoNode, MoveEntry } from '../types/pokemon';
+import type { SlimCreature, PokemonTypeName, SpeciesData, EvoNode, MoveEntry, PokemonFormVariant } from '../types/pokemon';
 
 
 function MatchupPill({ type, mult }: { type: PokemonTypeName; mult: number }) {
@@ -124,7 +124,7 @@ export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const creatures = useDexStore((s) => s.creatures);
   const creature = creatures.find((c) => c.id === Number(id));
-  const { teamIds, addById } = useTeamStore();
+  const { teamIds, addById, setForm } = useTeamStore();
   const inTeam = teamIds.includes(Number(id));
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
@@ -133,6 +133,11 @@ export function DetailPage() {
   const [evoChain, setEvoChain] = useState<EvoNode[] | null>(null);
   const [flavor, setFlavor] = useState('');
   const [abilityEffects, setAbilityEffects] = useState<Record<string, string>>({});
+
+  // Form selector state
+  const [selectedFormName, setSelectedFormName] = useState<string | null>(null);
+  const [formCreature, setFormCreature] = useState<SlimCreature | null>(null);
+  const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
     if (creature) {
@@ -182,11 +187,32 @@ export function DetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creature?.id]);
 
-  const tint = creature ? (TYPE_HEX[creature.types[0]] ?? '#666') : '#666';
+  // Reset form selection when navigating to a different Pokémon
+  useEffect(() => {
+    setSelectedFormName(null);
+    setFormCreature(null);
+  }, [creature?.id]);
+
+  // Fetch form creature when a form chip is selected
+  useEffect(() => {
+    if (!selectedFormName) { setFormCreature(null); return; }
+    let cancelled = false;
+    setFormLoading(true);
+    fetchSlimCreature(selectedFormName)
+      .then((c) => { if (!cancelled) setFormCreature(c); })
+      .catch(() => { if (!cancelled) setFormCreature(null); })
+      .finally(() => { if (!cancelled) setFormLoading(false); });
+    return () => { cancelled = true; };
+  }, [selectedFormName]);
+
+  // Use form creature for display when one is selected; fall back to base creature
+  const activeCreature = formCreature ?? creature;
+  const tint = activeCreature ? (TYPE_HEX[activeCreature.types[0]] ?? '#666') : '#666';
 
   const defProfile = useMemo(
-    () => (creature ? defensiveProfileExport(creature.types) : {} as Record<PokemonTypeName, number>),
-    [creature]
+    () => (activeCreature ? defensiveProfileExport(activeCreature.types) : {} as Record<PokemonTypeName, number>),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeCreature?.types.join(',')]
   );
 
   const groups = useMemo(() => {
@@ -207,7 +233,13 @@ export function DetailPage() {
     if (inTeam) { showToast(`${creature.name} already in team`); return; }
     if (teamIds.length >= 6) { showToast('Team is full (6/6)'); return; }
     addById(creature.id);
-    showToast(`+ ${creature.name} added`);
+    if (selectedFormName && formCreature) {
+      setForm(creature.id, selectedFormName, formCreature);
+    }
+    const displayName = formCreature
+      ? formCreature.name.replace(/-/g, ' ')
+      : creature.name.replace(/-/g, ' ');
+    showToast(`+ ${displayName} added`);
   }
 
   if (!creature) {
@@ -225,9 +257,12 @@ export function DetailPage() {
       <div className="detail-header" style={{ '--card-tint': tint } as React.CSSProperties}>
         <div className="detail-art" style={{ '--card-tint': tint } as React.CSSProperties}>
           <div className="pixel-id">N°{String(creature.id).padStart(4, '0')}</div>
-          <Sprite id={creature.id} kind="official" alt={creature.name} />
+          {formLoading
+            ? <div className="skeleton" style={{ width: 200, height: 200, borderRadius: 16 }} />
+            : <Sprite id={activeCreature!.id} kind="official" alt={activeCreature!.name} />
+          }
           <div className="pixel-strip">
-            <Sprite id={creature.id} kind="pixel" alt="" />
+            <Sprite id={activeCreature!.id} kind="pixel" alt="" />
             <span>SPRITE_8BIT</span>
           </div>
         </div>
@@ -235,21 +270,45 @@ export function DetailPage() {
           <div className="d-id">
             #{String(creature.id).padStart(3, '0')} / GEN {generationOf(creature.id)}
           </div>
-          <h1>{creature.name.replace(/-/g, ' ')}</h1>
+          <h1>{activeCreature!.name.replace(/-/g, ' ')}</h1>
           <div className="types-row">
-            {creature.types.map((t) => <TypeBadge key={t} type={t} size="lg" />)}
+            {activeCreature!.types.map((t) => <TypeBadge key={t} type={t} size="lg" />)}
           </div>
+
+          {/* Form selector chips — shown when species has alternate variants */}
+          {species && species.variants.length > 0 && (
+            <div className="form-selector" aria-label="Select form">
+              <button
+                className="form-chip"
+                data-active={selectedFormName === null}
+                onClick={() => setSelectedFormName(null)}
+              >
+                Base Form
+              </button>
+              {species.variants.map((v: PokemonFormVariant) => (
+                <button
+                  key={v.name}
+                  className="form-chip"
+                  data-active={selectedFormName === v.name}
+                  onClick={() => setSelectedFormName(v.name === selectedFormName ? null : v.name)}
+                >
+                  {v.displayName}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="flavor">
             {flavor || (species === null ? <span className="loader-dot" /> : '—')}
           </div>
           <div className="kv-grid">
             <div className="kv">
               <div className="k">HEIGHT</div>
-              <div className="v">{(creature.height / 10).toFixed(1)}<span className="unit">m</span></div>
+              <div className="v">{(activeCreature!.height / 10).toFixed(1)}<span className="unit">m</span></div>
             </div>
             <div className="kv">
               <div className="k">WEIGHT</div>
-              <div className="v">{(creature.weight / 10).toFixed(1)}<span className="unit">kg</span></div>
+              <div className="v">{(activeCreature!.weight / 10).toFixed(1)}<span className="unit">kg</span></div>
             </div>
             <div className="kv">
               <div className="k">CAPTURE</div>
@@ -257,7 +316,7 @@ export function DetailPage() {
             </div>
             <div className="kv">
               <div className="k">BST</div>
-              <div className="v" style={{ color: 'var(--accent)' }}>{creature.bst}</div>
+              <div className="v" style={{ color: 'var(--accent)' }}>{activeCreature!.bst}</div>
             </div>
             <div className="kv" style={{ gridColumn: '1 / -1' }}>
               <div className="k">EGG GROUPS</div>
@@ -278,7 +337,7 @@ export function DetailPage() {
       <div className="detail-grid">
         <div className="section">
           <h3>Base stats</h3>
-          <StatBars stats={creature.stats} />
+          <StatBars stats={activeCreature!.stats} />
         </div>
         <div className="section">
           <h3>
@@ -322,7 +381,7 @@ export function DetailPage() {
       <div className="section">
         <h3>Abilities</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {creature.abilities.map((a) => (
+          {activeCreature!.abilities.map((a) => (
             <div
               key={a.name}
               style={{
@@ -379,10 +438,10 @@ export function DetailPage() {
         <h3>
           Moves{' '}
           <span style={{ color: 'var(--fg-3)', fontWeight: 500, letterSpacing: 0, textTransform: 'none', marginLeft: 8 }}>
-            ({creature.moveCount} total)
+            ({activeCreature!.moveCount} total)
           </span>
         </h3>
-        <MovePoolPreview creature={creature} />
+        <MovePoolPreview creature={activeCreature!} />
       </div>
     </div>
   );

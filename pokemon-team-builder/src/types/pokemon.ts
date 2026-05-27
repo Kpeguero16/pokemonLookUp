@@ -33,12 +33,20 @@ export interface EvoNode {
   depth: number;
 }
 
+/** A meaningful alternate form (regional variant or Mega Evolution) */
+export interface PokemonFormVariant {
+  name: string;        // API name: "rattata-alola", "charizard-mega-x"
+  displayName: string; // Human-readable: "Alolan Form", "Mega X"
+  isDefault: boolean;
+}
+
 /** Species data fetched on the detail page */
 export interface SpeciesData {
   captureRate: number | null;
   flavorText: string;
   evolutionChainUrl: string | null;
   eggGroups: string[];
+  variants: PokemonFormVariant[]; // regional + mega forms only
 }
 
 /** Move data for the move pool preview */

@@ -8,9 +8,10 @@ interface CreatureCardProps {
   onSelect?: (c: SlimCreature) => void;
   onAdd?: (c: SlimCreature) => void;
   inTeam?: boolean;
+  hasForms?: boolean;
 }
 
-export function CreatureCard({ creature, onSelect, onAdd, inTeam }: CreatureCardProps) {
+export function CreatureCard({ creature, onSelect, onAdd, inTeam, hasForms }: CreatureCardProps) {
   const tint = TYPE_HEX[creature.types[0]] ?? '#666';
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -36,7 +37,10 @@ export function CreatureCard({ creature, onSelect, onAdd, inTeam }: CreatureCard
       </div>
       <div className="c-name">
         <span>{creature.name.replace(/-/g, ' ')}</span>
-        <span className="c-bst">{creature.bst}</span>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {hasForms && <span className="forms-badge">FORMS</span>}
+          <span className="c-bst">{creature.bst}</span>
+        </div>
       </div>
       <div className="c-types">
         {creature.types.map((t) => <TypeBadge key={t} type={t} size="sm" />)}

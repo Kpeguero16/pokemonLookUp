@@ -1204,4 +1204,144 @@ main#main-content { display: block; }
 .cov-cell .ct { font-size: 10px; }
 .role-card .rl { font-size: 11px; }
 .speed-tier-marker { font-size: 10px; }
+
+/* ── Forms badge on dex / picker cards ────────────────────────────────────── */
+.forms-badge {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  letter-spacing: .5px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent-cool) 20%, transparent);
+  color: var(--accent-cool);
+  border: 1px solid color-mix(in srgb, var(--accent-cool) 35%, transparent);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ── Form selector on Detail page ─────────────────────────────────────────── */
+.form-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.form-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-2);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.form-chip:hover { background: var(--bg-3); color: var(--fg-1); }
+.form-chip[data-active="true"] {
+  background: color-mix(in srgb, var(--accent-cool) 18%, var(--bg-2));
+  color: var(--accent-cool);
+  border-color: var(--accent-cool);
+}
+
+/* ── Form picker inside PickerModal ───────────────────────────────────────── */
+.form-picker { display: flex; flex-direction: column; gap: 14px; }
+.form-picker-back {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  width: fit-content;
+}
+.form-picker-back:hover { color: var(--accent-cool); }
+.form-picker-header { display: flex; flex-direction: column; gap: 4px; }
+.form-picker-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--fg-0);
+  text-transform: capitalize;
+}
+.form-picker-subtitle { font-size: 12px; color: var(--fg-3); }
+
+.form-option-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+  text-align: left;
+  width: 100%;
+}
+.form-option-card:hover:not(:disabled) {
+  background: var(--bg-3);
+  border-color: var(--accent-cool);
+}
+.form-option-card:disabled { opacity: .6; cursor: not-allowed; }
+
+.foc-sprite { flex-shrink: 0; width: 48px; height: 48px; }
+.foc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.foc-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fg-0);
+}
+.foc-types { display: flex; gap: 4px; flex-wrap: wrap; }
+.foc-bst {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.foc-delta {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.foc-delta.pos { color: var(--stat-hp); background: color-mix(in srgb, var(--stat-hp) 12%, transparent); }
+.foc-delta.neg { color: var(--accent-hot); background: color-mix(in srgb, var(--accent-hot) 12%, transparent); }
+
+.foc-arrow {
+  color: var(--fg-3);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.foc-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-cool);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+[data-theme="light"] .forms-badge {
+  background: color-mix(in srgb, var(--accent-cool) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent-cool) 30%, transparent);
+}
+[data-theme="light"] .form-chip {
+  background: var(--bg-1);
+  border-color: var(--border);
+  color: var(--fg-2);
+}
+[data-theme="light"] .form-chip[data-active="true"] {
+  background: color-mix(in srgb, var(--accent-cool) 12%, var(--bg-1));
+}
+[data-theme="light"] .form-option-card { background: var(--bg-1); }
+[data-theme="light"] .form-option-card:hover:not(:disabled) { background: var(--bg-2); }
 .moves-table .row.row-header { font-size: 11px; }

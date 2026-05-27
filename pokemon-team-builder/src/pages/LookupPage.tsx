@@ -9,6 +9,7 @@ import { TypeBadge } from '../components/layout/TypeBadge';
 import { CreatureCard } from '../components/lookup/CreatureCard';
 import { Sprite } from '../components/lookup/Sprite';
 import { generationOf } from '../utils/format';
+import { POKEMON_WITH_FORMS } from '../constants/forms';
 import type { SlimCreature, PokemonTypeName } from '../types/pokemon';
 
 function ListRow({ creature, onSelect, onAdd }: {
@@ -305,6 +306,7 @@ export function LookupPage() {
                 onSelect={() => navigate(`/detail/${c.id}`)}
                 onAdd={() => handleAdd(c)}
                 inTeam={teamIdSet.has(c.id)}
+                hasForms={POKEMON_WITH_FORMS.has(c.id)}
               />
             ))}
           </div>

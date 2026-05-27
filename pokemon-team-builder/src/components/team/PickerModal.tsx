@@ -1,13 +1,15 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ALL_TYPES } from '../../constants/typeChart';
 import { TYPE_HEX } from '../../constants/typeColors';
+import { POKEMON_WITH_FORMS } from '../../constants/forms';
 import { CreatureCard } from '../lookup/CreatureCard';
+import { FormPickerModal } from './FormPickerModal';
 import type { SlimCreature, PokemonTypeName } from '../../types/pokemon';
 
 interface PickerModalProps {
   creatures: SlimCreature[];
   teamIds: Set<number>;
-  onPick: (c: SlimCreature) => void;
+  onPick: (c: SlimCreature, formName: string | null, formCreature: SlimCreature | null) => void;
   onClose: () => void;
   slotNum: number;
 }
@@ -15,6 +17,7 @@ interface PickerModalProps {
 export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: PickerModalProps) {
   const [q, setQ] = useState('');
   const [tf, setTf] = useState('');
+  const [formTarget, setFormTarget] = useState<SlimCreature | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,6 +52,14 @@ export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: Pi
     }).slice(0, 60);
   }, [creatures, teamIds, q, tf]);
 
+  function handleCardSelect(c: SlimCreature) {
+    if (POKEMON_WITH_FORMS.has(c.id)) {
+      setFormTarget(c);
+    } else {
+      onPick(c, null, null);
+    }
+  }
+
   return (
     <div className="modal-bd" onClick={onClose}>
       <div
@@ -66,66 +77,81 @@ export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: Pi
           <button className="icon-btn" onClick={onClose} aria-label="Close picker">×</button>
         </div>
         <div className="modal-body">
-          <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
-            <div className="search-input">
-              <span className="si-icon" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                  <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-                </svg>
-              </span>
-              <label htmlFor="picker-search" className="sr-only">
-                Search Pokémon by name or number
-              </label>
-              <input
-                id="picker-search"
-                autoFocus
-                type="search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="search..."
-              />
-            </div>
-            {/* Type filter: native select on desktop, chip row on mobile */}
-            <select
-              value={tf}
-              onChange={(e) => setTf(e.target.value)}
-              className="dex-select picker-type-select"
-              aria-label="Filter by type"
-            >
-              <option value="">all types</option>
-              {ALL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <div className="picker-type-chips" role="group" aria-label="Filter by type">
-              <button
-                className="type-filter-pill"
-                data-on={tf === ''}
-                onClick={() => setTf('')}
-                style={{ flexShrink: 0 }}
-              >
-                All
-              </button>
-              {ALL_TYPES.map((t) => (
-                <button
-                  key={t}
-                  className="type-filter-pill"
-                  data-on={tf === t}
-                  onClick={() => setTf(tf === t ? '' : t)}
-                  style={tf === t ? { color: TYPE_HEX[t as PokemonTypeName], flexShrink: 0 } : { flexShrink: 0 }}
+          {formTarget ? (
+            <FormPickerModal
+              creature={formTarget}
+              onPickForm={(base, formName, formCreature) => onPick(base, formName, formCreature)}
+              onBack={() => setFormTarget(null)}
+            />
+          ) : (
+            <>
+              <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
+                <div className="search-input">
+                  <span className="si-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+                    </svg>
+                  </span>
+                  <label htmlFor="picker-search" className="sr-only">
+                    Search Pokémon by name or number
+                  </label>
+                  <input
+                    id="picker-search"
+                    autoFocus
+                    type="search"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="search..."
+                  />
+                </div>
+                {/* Type filter: native select on desktop, chip row on mobile */}
+                <select
+                  value={tf}
+                  onChange={(e) => setTf(e.target.value)}
+                  className="dex-select picker-type-select"
+                  aria-label="Filter by type"
                 >
-                  <span className="swatch" style={{ background: TYPE_HEX[t as PokemonTypeName] }} />
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="cards-grid picker-cards-grid" style={{ padding: 2 }}>
-            {filtered.map((c) => (
-              <CreatureCard key={c.id} creature={c} onSelect={() => onPick(c)} />
-            ))}
-            {filtered.length === 0 && (
-              <div className="empty-state" style={{ gridColumn: '1/-1' }}>no matches</div>
-            )}
-          </div>
+                  <option value="">all types</option>
+                  {ALL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <div className="picker-type-chips" role="group" aria-label="Filter by type">
+                  <button
+                    className="type-filter-pill"
+                    data-on={tf === ''}
+                    onClick={() => setTf('')}
+                    style={{ flexShrink: 0 }}
+                  >
+                    All
+                  </button>
+                  {ALL_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      className="type-filter-pill"
+                      data-on={tf === t}
+                      onClick={() => setTf(tf === t ? '' : t)}
+                      style={tf === t ? { color: TYPE_HEX[t as PokemonTypeName], flexShrink: 0 } : { flexShrink: 0 }}
+                    >
+                      <span className="swatch" style={{ background: TYPE_HEX[t as PokemonTypeName] }} />
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="cards-grid picker-cards-grid" style={{ padding: 2 }}>
+                {filtered.map((c) => (
+                  <CreatureCard
+                    key={c.id}
+                    creature={c}
+                    onSelect={() => handleCardSelect(c)}
+                    hasForms={POKEMON_WITH_FORMS.has(c.id)}
+                  />
+                ))}
+                {filtered.length === 0 && (
+                  <div className="empty-state" style={{ gridColumn: '1/-1' }}>no matches</div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

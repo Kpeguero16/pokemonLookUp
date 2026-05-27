@@ -58,7 +58,7 @@ function TeamSlotCard({ index, creature, onAdd, onRemove, onSelect }: {
 // ── TeamPage ──────────────────────────────────────────────────────────────────
 export function TeamPage() {
   const team = useTeam();
-  const { teamIds, teamName, addById, removeById, clearTeam, randomizeIds, setTeamIds, setTeamName } = useTeamStore();
+  const { teamIds, teamName, addById, removeById, clearTeam, randomizeIds, setTeamIds, setTeamName, setForm } = useTeamStore();
   const teamIdSet = useMemo(() => new Set(teamIds), [teamIds]);
   const creatures = useDexStore((s) => s.creatures);
   const showToast = useToastStore((s) => s.showToast);
@@ -100,6 +100,8 @@ export function TeamPage() {
       const abilityName = abilityObj
         ? abilityObj.name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
         : 'No Ability';
+      // Use the stored form name for Showdown export (e.g. "rattata-alola" → "Rattata-Alola")
+      // teamForms is keyed by base ID; for form creatures c.name already is the form name
       const showdownName = c.name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
       return [showdownName, `Ability: ${abilityName}`, '- Move 1', '- Move 2', '- Move 3', '- Move 4'].join('\n');
     });
@@ -123,13 +125,17 @@ export function TeamPage() {
     setPickerOpen(true);
   }
 
-  function pickIntoSlot(c: SlimCreature) {
+  function pickIntoSlot(c: SlimCreature, formName: string | null, formCreature: SlimCreature | null) {
     if (teamIdSet.has(c.id)) { showToast('already in team'); return; }
     const next = [...teamIds];
     next[pickerSlot] = c.id;
     setTeamIds(next.filter(Boolean) as number[]);
+    if (formName && formCreature) {
+      setForm(c.id, formName, formCreature);
+    }
     setPickerOpen(false);
-    showToast(`+ ${c.name}`);
+    const displayName = formCreature ? formCreature.name.replace(/-/g, ' ') : c.name.replace(/-/g, ' ');
+    showToast(`+ ${displayName}`);
   }
 
   return (
@@ -276,7 +282,7 @@ export function TeamPage() {
         <PickerModal
           creatures={creatures}
           teamIds={teamIdSet}
-          onPick={pickIntoSlot}
+          onPick={(c, formName, formCreature) => pickIntoSlot(c, formName, formCreature)}
           onClose={() => setPickerOpen(false)}
           slotNum={pickerSlot + 1}
         />

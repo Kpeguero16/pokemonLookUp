@@ -1,4 +1,4 @@
-import type { SlimCreature, PokeAPIResponse, SpeciesData, EvoNode, MoveEntry } from '../types/pokemon';
+import type { SlimCreature, PokeAPIResponse, SpeciesData, EvoNode, MoveEntry, PokemonFormVariant } from '../types/pokemon';
 import { concurrentMap } from '../utils/concurrentMap';
 
 const BASE = 'https://pokeapi.co/api/v2';
@@ -115,20 +115,55 @@ export async function fetchCreaturesRange(
 
 // ── Species & Evolution ──────────────────────────────────────────────────────
 
+/** Only keep variants with meaningful gameplay differences (regional / mega). */
+const MEANINGFUL_FORM_RE = /-(alola|galar|hisui|paldea|mega)/;
+
+const FORM_SUFFIX_LABELS: Record<string, string> = {
+  'alola':  'Alolan Form',
+  'galar':  'Galarian Form',
+  'hisui':  'Hisuian Form',
+  'paldea': 'Paldean Form',
+  'mega':   'Mega',
+  'mega-x': 'Mega X',
+  'mega-y': 'Mega Y',
+};
+
+export function getFormDisplayName(speciesName: string, formApiName: string): string {
+  const suffix = formApiName.startsWith(`${speciesName}-`)
+    ? formApiName.slice(speciesName.length + 1)
+    : formApiName;
+  return (
+    FORM_SUFFIX_LABELS[suffix] ??
+    suffix.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  );
+}
+
 export async function fetchSpecies(url: string): Promise<SpeciesData> {
   const data = await fetchJSON<{
+    name: string;
     capture_rate: number;
     flavor_text_entries: { flavor_text: string; language: { name: string } }[];
     evolution_chain?: { url: string };
     egg_groups: { name: string }[];
+    varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
   }>(url);
 
   const entry = data.flavor_text_entries.find((e) => e.language.name === 'en');
+
+  const variants: PokemonFormVariant[] = (data.varieties ?? [])
+    .filter((v) => !v.is_default && MEANINGFUL_FORM_RE.test(v.pokemon.name))
+    .map((v) => ({
+      name: v.pokemon.name,
+      displayName: getFormDisplayName(data.name, v.pokemon.name),
+      isDefault: false,
+    }));
+
   return {
     captureRate: data.capture_rate ?? null,
     flavorText: entry ? entry.flavor_text.replace(/[\f\n\r]/g, ' ') : '',
     evolutionChainUrl: data.evolution_chain?.url ?? null,
     eggGroups: data.egg_groups?.map((g) => g.name.replace(/-/g, ' ')) ?? [],
+    variants,
   };
 }
 
