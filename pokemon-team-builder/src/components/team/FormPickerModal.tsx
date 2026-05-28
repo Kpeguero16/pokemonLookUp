@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchSpecies, fetchSlimCreature } from '../../lib/pokeapi';
 import { TypeBadge } from '../layout/TypeBadge';
 import { Sprite } from '../lookup/Sprite';
+import { useToastStore } from '../../store/toastStore';
 import type { SlimCreature, PokemonFormVariant } from '../../types/pokemon';
 
 interface FormPickerModalProps {
@@ -20,6 +21,7 @@ export function FormPickerModal({ creature, onPickForm, onBack }: FormPickerModa
   const [options, setOptions] = useState<FormOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingForm, setLoadingForm] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.showToast);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,26 +44,24 @@ export function FormPickerModal({ creature, onPickForm, onBack }: FormPickerModa
         return;
       }
 
-      setOptions([baseOpt, ...variantOpts]);
-      setLoading(false);
-
-      // Lazily fetch all form creatures for stat previews
+      // Fetch ALL form creatures before showing options — this ensures handlePick
+      // always takes the synchronous path (opt.creature is never null), avoiding
+      // the stale-closure / async-batching issue that prevented modal close.
       const resolved = await Promise.allSettled(
         variantOpts.map((o) => fetchSlimCreature(o.formName!))
       );
       if (cancelled) return;
 
-      setOptions((prev) =>
-        prev.map((opt, i) => {
-          if (opt.formName === null) return opt; // base
-          const idx = i - 1; // offset by 1 because base is first
-          const result = resolved[idx];
-          return {
-            ...opt,
-            creature: result.status === 'fulfilled' ? result.value : null,
-          };
-        })
-      );
+      const loadedVariants: FormOption[] = variantOpts.map((opt, idx) => ({
+        ...opt,
+        creature:
+          resolved[idx].status === 'fulfilled'
+            ? (resolved[idx] as PromiseFulfilledResult<SlimCreature>).value
+            : null,
+      }));
+
+      setOptions([baseOpt, ...loadedVariants]);
+      setLoading(false);
     }).catch(() => {
       if (!cancelled) {
         // Fall back: just pick base form with no form selection
@@ -87,13 +87,13 @@ export function FormPickerModal({ creature, onPickForm, onBack }: FormPickerModa
       return;
     }
 
-    // Still loading — fetch on demand
+    // Still loading — fetch on demand (only reached if preload failed)
     setLoadingForm(opt.formName);
     try {
       const formCreature = await fetchSlimCreature(opt.formName);
       onPickForm(creature, opt.formName, formCreature);
     } catch {
-      // Fall back to base
+      showToast('Could not load form data — adding base form');
       onPickForm(creature, null, null);
     } finally {
       setLoadingForm(null);

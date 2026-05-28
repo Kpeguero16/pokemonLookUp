@@ -168,13 +168,14 @@ export function DetailPage() {
   }, [creature?.id]);
 
   useEffect(() => {
-    if (!creature) return;
+    const c = formCreature ?? creature;
+    if (!c) return;
     let cancelled = false;
     setAbilityEffects({});
     (async () => {
       const effects: Record<string, string> = {};
       await Promise.all(
-        creature.abilities.map(async (a) => {
+        c.abilities.map(async (a) => {
           try {
             const d = await fetchAbilityDetail(a.name);
             effects[a.name] = d.effect;
@@ -185,7 +186,7 @@ export function DetailPage() {
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creature?.id]);
+  }, [creature?.id, formCreature]);
 
   // Reset form selection when navigating to a different Pokémon
   useEffect(() => {
@@ -326,8 +327,12 @@ export function DetailPage() {
             </div>
           </div>
           <div className="detail-actions">
-            <button className="btn btn-primary" onClick={handleAdd} disabled={inTeam}>
-              {inTeam ? '✓ In team' : '+ Add to team'}
+            <button
+              className="btn btn-primary"
+              onClick={handleAdd}
+              disabled={inTeam || (!!selectedFormName && formLoading)}
+            >
+              {inTeam ? '✓ In team' : formLoading && selectedFormName ? 'Loading form…' : '+ Add to team'}
             </button>
             <button className="btn btn-ghost" onClick={() => navigate('/')}>Browse dex</button>
           </div>
