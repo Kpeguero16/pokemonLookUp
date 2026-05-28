@@ -11,11 +11,14 @@ interface SpriteProps {
 
 export function Sprite({ id, kind = 'official', className, alt, style }: SpriteProps) {
   const [errored, setErrored] = useState(false);
+  const [triedBoth, setTriedBoth] = useState(false);
 
   // Reset error state whenever the target sprite changes
-  useEffect(() => { setErrored(false); }, [id, kind]);
+  useEffect(() => { setErrored(false); setTriedBoth(false); }, [id, kind]);
 
-  const src = errored || kind === 'pixel' ? spritePixel(id) : spriteOfficial(id);
+  const primary = kind === 'pixel' ? spritePixel(id) : spriteOfficial(id);
+  const fallback = kind === 'pixel' ? spriteOfficial(id) : spritePixel(id);
+  const src = triedBoth ? '/not_found.png' : errored ? fallback : primary;
 
   return (
     <img
@@ -24,7 +27,13 @@ export function Sprite({ id, kind = 'official', className, alt, style }: SpriteP
       style={{ ...(kind === 'pixel' ? { imageRendering: 'pixelated' as const } : {}), ...style }}
       alt={alt ?? ''}
       loading="lazy"
-      onError={() => setErrored(true)}
+      onError={() => {
+        if (errored && !triedBoth) {
+          setTriedBoth(true);
+        } else {
+          setErrored(true);
+        }
+      }}
     />
   );
 }
