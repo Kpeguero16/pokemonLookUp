@@ -58,8 +58,7 @@ const genPillStyle: React.CSSProperties = { flex: '1 0 30%', justifyContent: 'ce
 
 export function LookupPage() {
   const creatures = useDexStore((s) => s.creatures);
-  const { teamIds, addById } = useTeamStore();
-  const teamIdSet = useMemo(() => new Set(teamIds), [teamIds]);
+  const { teamIds, addSlot } = useTeamStore();
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
 
@@ -140,9 +139,8 @@ export function LookupPage() {
   }
 
   function handleAdd(c: SlimCreature) {
-    if (teamIdSet.has(c.id)) { showToast(`${c.name} already in team`); return; }
     if (teamIds.length >= 6) { showToast('Team is full (6/6)'); return; }
-    addById(c.id);
+    addSlot(c.id);
     showToast(`+ ${c.name} added`);
   }
 
@@ -305,7 +303,6 @@ export function LookupPage() {
                 creature={c}
                 onSelect={() => navigate(`/detail/${c.id}`)}
                 onAdd={() => handleAdd(c)}
-                inTeam={teamIdSet.has(c.id)}
                 hasForms={POKEMON_WITH_FORMS.has(c.id)}
               />
             ))}

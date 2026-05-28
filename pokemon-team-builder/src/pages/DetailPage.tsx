@@ -124,8 +124,7 @@ export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const creatures = useDexStore((s) => s.creatures);
   const creature = creatures.find((c) => c.id === Number(id));
-  const { teamIds, addById, setForm } = useTeamStore();
-  const inTeam = teamIds.includes(Number(id));
+  const { teamIds, addSlot, setForm } = useTeamStore();
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
 
@@ -231,11 +230,11 @@ export function DetailPage() {
 
   function handleAdd() {
     if (!creature) return;
-    if (inTeam) { showToast(`${creature.name} already in team`); return; }
     if (teamIds.length >= 6) { showToast('Team is full (6/6)'); return; }
-    addById(creature.id);
+    const slotIndex = teamIds.length;
+    addSlot(creature.id);
     if (selectedFormName && formCreature) {
-      setForm(creature.id, selectedFormName, formCreature);
+      setForm(slotIndex, selectedFormName, formCreature);
     }
     const displayName = formCreature
       ? formCreature.name.replace(/-/g, ' ')
@@ -330,9 +329,9 @@ export function DetailPage() {
             <button
               className="btn btn-primary"
               onClick={handleAdd}
-              disabled={inTeam || (!!selectedFormName && formLoading)}
+              disabled={!!selectedFormName && formLoading}
             >
-              {inTeam ? '✓ In team' : formLoading && selectedFormName ? 'Loading form…' : '+ Add to team'}
+              {formLoading && selectedFormName ? 'Loading form…' : '+ Add to team'}
             </button>
             <button className="btn btn-ghost" onClick={() => navigate('/')}>Browse dex</button>
           </div>

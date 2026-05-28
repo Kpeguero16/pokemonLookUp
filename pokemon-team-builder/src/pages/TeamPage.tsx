@@ -61,8 +61,7 @@ function TeamSlotCard({ index, creature, baseId, onAdd, onRemove, onSelect }: {
 // ── TeamPage ──────────────────────────────────────────────────────────────────
 export function TeamPage() {
   const team = useTeam();
-  const { teamIds, teamName, addById, removeById, clearTeam, randomizeIds, setTeamIds, setTeamName, setForm } = useTeamStore();
-  const teamIdSet = useMemo(() => new Set(teamIds), [teamIds]);
+  const { teamIds, teamName, removeSlot, clearTeam, randomizeIds, setTeamIds, setTeamName, setForm } = useTeamStore();
   const creatures = useDexStore((s) => s.creatures);
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
@@ -85,13 +84,15 @@ export function TeamPage() {
   function removeAt(i: number) {
     const creature = slots[i];
     if (!creature) return;
-    // Use the base dex ID (teamIds[i]) — form creatures have PokeAPI IDs like
-    // 10034 that don't exist in teamIds, so removeById(creature.id) would be a no-op.
-    const baseId = teamIds[i] ?? creature.id;
-    removeById(baseId);
+    const baseId = teamIds[i];
+    removeSlot(i);
     showToast(
       `Removed ${creature.name.replace(/-/g, ' ')}`,
-      { label: 'Undo', fn: () => addById(baseId) }
+      { label: 'Undo', fn: () => {
+        const next = [...teamIds];
+        next.splice(i, 0, baseId);
+        setTeamIds(next);
+      }}
     );
   }
 
@@ -132,12 +133,11 @@ export function TeamPage() {
   }
 
   function pickIntoSlot(c: SlimCreature, formName: string | null, formCreature: SlimCreature | null) {
-    if (teamIdSet.has(c.id)) { showToast('already in team'); return; }
     const next = [...teamIds];
     next[pickerSlot] = c.id;
     setTeamIds(next.filter(Boolean) as number[]);
     if (formName && formCreature) {
-      setForm(c.id, formName, formCreature);
+      setForm(pickerSlot, formName, formCreature);
     }
     setPickerOpen(false);
     const displayName = formCreature ? formCreature.name.replace(/-/g, ' ') : c.name.replace(/-/g, ' ');
@@ -292,7 +292,6 @@ export function TeamPage() {
       {pickerOpen && (
         <PickerModal
           creatures={creatures}
-          teamIds={teamIdSet}
           onPick={(c, formName, formCreature) => pickIntoSlot(c, formName, formCreature)}
           onClose={() => setPickerOpen(false)}
           slotNum={pickerSlot + 1}

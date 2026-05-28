@@ -8,13 +8,12 @@ import type { SlimCreature, PokemonTypeName } from '../../types/pokemon';
 
 interface PickerModalProps {
   creatures: SlimCreature[];
-  teamIds: Set<number>;
   onPick: (c: SlimCreature, formName: string | null, formCreature: SlimCreature | null) => void;
   onClose: () => void;
   slotNum: number;
 }
 
-export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: PickerModalProps) {
+export function PickerModal({ creatures, onPick, onClose, slotNum }: PickerModalProps) {
   const [q, setQ] = useState('');
   const [tf, setTf] = useState('');
   const [formTarget, setFormTarget] = useState<SlimCreature | null>(null);
@@ -45,12 +44,11 @@ export function PickerModal({ creatures, teamIds, onPick, onClose, slotNum }: Pi
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
     return creatures.filter((c) => {
-      if (teamIds.has(c.id)) return false;
       if (ql && !c.name.includes(ql) && !String(c.id).includes(ql)) return false;
       if (tf && !c.types.includes(tf as PokemonTypeName)) return false;
       return true;
     }).slice(0, 60);
-  }, [creatures, teamIds, q, tf]);
+  }, [creatures, q, tf]);
 
   function handleCardSelect(c: SlimCreature) {
     if (POKEMON_WITH_FORMS.has(c.id)) {

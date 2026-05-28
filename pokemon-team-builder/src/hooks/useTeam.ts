@@ -10,7 +10,7 @@ export function useTeam(): SlimCreature[] {
   return useMemo(
     () =>
       teamIds
-        .map((id) => teamFormData[id] ?? creatures.find((c) => c.id === id))
+        .map((id, slotIndex) => teamFormData[slotIndex] ?? creatures.find((c) => c.id === id))
         .filter(Boolean) as SlimCreature[],
     [creatures, teamIds, teamFormData]
   );
