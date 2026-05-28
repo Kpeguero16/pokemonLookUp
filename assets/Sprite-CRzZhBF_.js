@@ -1,1 +1,0 @@
-import{r as t,j as p,k as x,s as c}from"./index-iCUwPi2I.js";function u({id:e,kind:r="official",className:a,alt:i,style:o}){const[l,s]=t.useState(!1);t.useEffect(()=>{s(!1)},[e,r]);const f=l||r==="pixel"?x(e):c(e);return p.jsx("img",{src:f,className:a,style:{...r==="pixel"?{imageRendering:"pixelated"}:{},...o},alt:i??"",loading:"lazy",onError:()=>s(!0)})}export{u as S};
