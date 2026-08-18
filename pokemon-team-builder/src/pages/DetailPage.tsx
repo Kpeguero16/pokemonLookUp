@@ -124,7 +124,7 @@ export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const creatures = useDexStore((s) => s.creatures);
   const creature = creatures.find((c) => c.id === Number(id));
-  const { teamIds, addSlot, setForm } = useTeamStore();
+  const { addSlot, setForm } = useTeamStore();
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
 
@@ -230,9 +230,8 @@ export function DetailPage() {
 
   function handleAdd() {
     if (!creature) return;
-    if (teamIds.length >= 6) { showToast('Team is full (6/6)'); return; }
-    const slotIndex = teamIds.length;
-    addSlot(creature.id);
+    const slotIndex = addSlot(creature.id);
+    if (slotIndex === null) { showToast('Team is full (6/6)'); return; }
     if (selectedFormName && formCreature) {
       setForm(slotIndex, selectedFormName, formCreature);
     }

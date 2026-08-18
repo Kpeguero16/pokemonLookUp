@@ -28,7 +28,7 @@ function CodexIcon() {
 }
 
 export function Navbar() {
-  const teamCount = useTeamStore((s) => s.teamIds.length);
+  const teamCount = useTeamStore((s) => s.teamIds.filter((id) => id !== null).length);
   const { theme, toggleDark } = useThemeStore();
   const isDark = theme === 'dark';
   const { pathname } = useLocation();

@@ -131,7 +131,7 @@ export function FormPickerModal({ creature, onPickForm, onBack }: FormPickerModa
       <div style={{ display: 'grid', gap: 8 }}>
         {options.map((opt) => {
           const disp = opt.creature ?? creature;
-          const isLoading = loadingForm === opt.formName;
+          const isLoading = loadingForm !== null && loadingForm === opt.formName;
           return (
             <button
               key={opt.formName ?? 'base'}

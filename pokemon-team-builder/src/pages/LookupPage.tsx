@@ -58,7 +58,7 @@ const genPillStyle: React.CSSProperties = { flex: '1 0 30%', justifyContent: 'ce
 
 export function LookupPage() {
   const creatures = useDexStore((s) => s.creatures);
-  const { teamIds, addSlot } = useTeamStore();
+  const { addSlot } = useTeamStore();
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
 
@@ -139,8 +139,7 @@ export function LookupPage() {
   }
 
   function handleAdd(c: SlimCreature) {
-    if (teamIds.length >= 6) { showToast('Team is full (6/6)'); return; }
-    addSlot(c.id);
+    if (addSlot(c.id) === null) { showToast('Team is full (6/6)'); return; }
     showToast(`+ ${c.name} added`);
   }
 

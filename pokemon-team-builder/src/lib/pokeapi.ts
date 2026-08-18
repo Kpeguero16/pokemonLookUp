@@ -3,7 +3,7 @@ import { concurrentMap } from '../utils/concurrentMap';
 
 const BASE = 'https://pokeapi.co/api/v2';
 const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
-const CACHE_PREFIX = 'dexmeta:v4:';
+const CACHE_PREFIX = 'dexmeta:v5:';
 const FETCH_TIMEOUT_MS = 10_000;
 
 // ── LocalStorage cache ──────────────────────────────────────────────────────
@@ -17,11 +17,20 @@ function cacheGet<T>(key: string): T | null {
   }
 }
 
+/** Evicts every cached PokeAPI response (any cache version). Used to free up quota for other localStorage writes. */
+export function evictAllCachedResponses(): void {
+  for (const k of Object.keys(localStorage)) {
+    if (k.startsWith('dexmeta:v')) {
+      localStorage.removeItem(k);
+    }
+  }
+}
+
 function cacheSet(key: string, val: unknown): void {
   try {
     localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(val));
   } catch {
-    // Quota exceeded — flush old cache entries
+    // Quota exceeded — flush old-version cache entries first (cheap), then fall back to everything.
     try {
       for (const k of Object.keys(localStorage)) {
         if (k.startsWith('dexmeta:v') && !k.startsWith(CACHE_PREFIX)) {
@@ -29,32 +38,49 @@ function cacheSet(key: string, val: unknown): void {
         }
       }
       localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(val));
-    } catch { /* ignore */ }
+    } catch {
+      try {
+        evictAllCachedResponses();
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(val));
+      } catch { /* ignore */ }
+    }
   }
 }
 
 const inflight: Partial<Record<string, Promise<unknown>>> = {};
 
-async function fetchJSON<T>(url: string): Promise<T> {
-  const key = url.replace(BASE, '');
-  const cached = cacheGet<T>(key);
+/**
+ * Fetches `url` and caches the result under `localStorage`, keyed by its path.
+ * `transform` derives what actually gets cached/returned from the raw response — pass one
+ * whenever the raw payload is much larger than what callers need (e.g. a full `/pokemon/<id>`
+ * response vs. the small summary most callers want), so the cache stays small.
+ * `cacheKeySuffix` disambiguates multiple distinct cached shapes derived from the same URL
+ * (e.g. a Pokémon's summary vs. its raw move list) — without it they'd collide on one cache key.
+ */
+async function fetchJSON<TRaw, TCached = TRaw>(
+  url: string,
+  opts?: { transform?: (raw: TRaw) => TCached; cacheKeySuffix?: string }
+): Promise<TCached> {
+  const key = url.replace(BASE, '') + (opts?.cacheKeySuffix ?? '');
+  const cached = cacheGet<TCached>(key);
   if (cached) return cached;
-  if (inflight[key]) return inflight[key] as Promise<T>;
+  if (inflight[key]) return inflight[key] as Promise<TCached>;
   inflight[key] = (async () => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     try {
       const r = await fetch(url, { signal: ctrl.signal });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      cacheSet(key, j);
-      return j;
+      const raw = (await r.json()) as TRaw;
+      const result = opts?.transform ? opts.transform(raw) : (raw as unknown as TCached);
+      cacheSet(key, result);
+      return result;
     } finally {
       clearTimeout(timer);
       delete inflight[key];
     }
   })();
-  return inflight[key] as Promise<T>;
+  return inflight[key] as Promise<TCached>;
 }
 
 // ── Sprite URLs ─────────────────────────────────────────────────────────────
@@ -95,8 +121,9 @@ function slimFromFull(p: PokeAPIResponse): SlimCreature {
 }
 
 export async function fetchSlimCreature(idOrName: string | number): Promise<SlimCreature> {
-  const data = await fetchJSON<PokeAPIResponse>(`${BASE}/pokemon/${idOrName}`);
-  return slimFromFull(data);
+  return fetchJSON<PokeAPIResponse, SlimCreature>(`${BASE}/pokemon/${idOrName}`, {
+    transform: slimFromFull,
+  });
 }
 
 /** Bulk-fetch creatures with parallelism and progress callback */
@@ -138,16 +165,16 @@ export function getFormDisplayName(speciesName: string, formApiName: string): st
   );
 }
 
-export async function fetchSpecies(url: string): Promise<SpeciesData> {
-  const data = await fetchJSON<{
-    name: string;
-    capture_rate: number;
-    flavor_text_entries: { flavor_text: string; language: { name: string } }[];
-    evolution_chain?: { url: string };
-    egg_groups: { name: string }[];
-    varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
-  }>(url);
+interface PokeAPISpeciesResponse {
+  name: string;
+  capture_rate: number;
+  flavor_text_entries: { flavor_text: string; language: { name: string } }[];
+  evolution_chain?: { url: string };
+  egg_groups: { name: string }[];
+  varieties: { is_default: boolean; pokemon: { name: string; url: string } }[];
+}
 
+function speciesFromFull(data: PokeAPISpeciesResponse): SpeciesData {
   const entry = data.flavor_text_entries.find((e) => e.language.name === 'en');
 
   const variants: PokemonFormVariant[] = (data.varieties ?? [])
@@ -167,6 +194,10 @@ export async function fetchSpecies(url: string): Promise<SpeciesData> {
   };
 }
 
+export async function fetchSpecies(url: string): Promise<SpeciesData> {
+  return fetchJSON<PokeAPISpeciesResponse, SpeciesData>(url, { transform: speciesFromFull });
+}
+
 interface PokeAPIEvoNode {
   species: { name: string; url: string };
   evolution_details: {
@@ -177,8 +208,7 @@ interface PokeAPIEvoNode {
   evolves_to: PokeAPIEvoNode[];
 }
 
-export async function fetchEvolutionChain(url: string): Promise<EvoNode[]> {
-  const data = await fetchJSON<{ chain: PokeAPIEvoNode }>(url);
+function evoChainFromFull(data: { chain: PokeAPIEvoNode }): EvoNode[] {
   const nodes: EvoNode[] = [];
 
   function walk(node: PokeAPIEvoNode, depth: number, trigger: string | null) {
@@ -199,11 +229,26 @@ export async function fetchEvolutionChain(url: string): Promise<EvoNode[]> {
   return nodes;
 }
 
+export async function fetchEvolutionChain(url: string): Promise<EvoNode[]> {
+  return fetchJSON<{ chain: PokeAPIEvoNode }, EvoNode[]>(url, { transform: evoChainFromFull });
+}
+
 // ── Move fetching ────────────────────────────────────────────────────────────
 
+/**
+ * Fetches just a Pokémon's raw move list. Cached separately from `fetchSlimCreature`'s summary
+ * (same URL, distinct cache key) since the summary doesn't carry `.moves`.
+ */
+async function fetchPokemonMoves(creatureId: number): Promise<PokeAPIResponse['moves']> {
+  return fetchJSON<PokeAPIResponse, PokeAPIResponse['moves']>(`${BASE}/pokemon/${creatureId}`, {
+    transform: (raw) => raw.moves,
+    cacheKeySuffix: ':moves',
+  });
+}
+
 export async function fetchLevelUpMoves(creatureId: number): Promise<MoveEntry[]> {
-  const raw = await fetchJSON<PokeAPIResponse>(`${BASE}/pokemon/${creatureId}`);
-  const lvlMoves = raw.moves
+  const rawMoves = await fetchPokemonMoves(creatureId);
+  const lvlMoves = rawMoves
     .map((m) => {
       const lvls = m.version_group_details
         .filter((v) => v.move_learn_method.name === 'level-up')
@@ -274,7 +319,7 @@ export async function fetchPokemonMoveSections(creatureId: number): Promise<{
   egg: MoveEntry[];
   tutor: MoveEntry[];
 }> {
-  const raw = await fetchJSON<PokeAPIResponse>(`${BASE}/pokemon/${creatureId}`);
+  const rawMoves = await fetchPokemonMoves(creatureId);
 
   async function resolveDetails(items: { name: string; url: string; lvl: number }[]): Promise<MoveEntry[]> {
     const results = await concurrentMap(items, async (m): Promise<MoveEntry | null> => {
@@ -292,7 +337,7 @@ export async function fetchPokemonMoveSections(creatureId: number): Promise<{
     return results.filter(Boolean) as MoveEntry[];
   }
 
-  const levelUpItems = raw.moves
+  const levelUpItems = rawMoves
     .map((m) => {
       const lvls = m.version_group_details
         .filter((v) => v.move_learn_method.name === 'level-up')
@@ -304,7 +349,7 @@ export async function fetchPokemonMoveSections(creatureId: number): Promise<{
     .sort((a, b) => a.lvl - b.lvl);
 
   function byMethod(method: string) {
-    return raw.moves
+    return rawMoves
       .filter((m) => m.version_group_details.some((v) => v.move_learn_method.name === method))
       .map((m) => ({ name: m.move.name, url: m.move.url, lvl: 0 }));
   }

@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDexStore } from '../store/dexStore';
 import { useTeamStore } from '../store/teamStore';
 import { useToastStore } from '../store/toastStore';
-import { useTeam } from '../hooks/useTeam';
+import { useTeam, useTeamSlots } from '../hooks/useTeam';
 import { TYPE_HEX } from '../constants/typeColors';
 import { TypeBadge } from '../components/layout/TypeBadge';
 import { Sprite } from '../components/lookup/Sprite';
@@ -18,7 +18,7 @@ function TeamSlotCard({ index, creature, baseId, onAdd, onRemove, onSelect }: {
   index: number;
   creature: SlimCreature | null;
   /** Base dex ID (1-1025) — for display and navigation; may differ from creature.id for form creatures */
-  baseId?: number;
+  baseId: number | null;
   onAdd: () => void;
   onRemove: () => void;
   onSelect: (c: SlimCreature, baseId: number) => void;
@@ -61,7 +61,8 @@ function TeamSlotCard({ index, creature, baseId, onAdd, onRemove, onSelect }: {
 // ── TeamPage ──────────────────────────────────────────────────────────────────
 export function TeamPage() {
   const team = useTeam();
-  const { teamIds, teamName, removeSlot, clearTeam, randomizeIds, setTeamIds, setTeamName, setForm } = useTeamStore();
+  const slots = useTeamSlots();
+  const { teamIds, teamForms, teamFormData, teamName, removeSlot, clearTeam, randomizeIds, setSlot, setTeamName, setForm } = useTeamStore();
   const creatures = useDexStore((s) => s.creatures);
   const showToast = useToastStore((s) => s.showToast);
   const navigate = useNavigate();
@@ -75,23 +76,24 @@ export function TeamPage() {
     document.title = `${teamName} — Pokémon Look Up`;
   }, [teamName]);
 
-  const slots: (SlimCreature | null)[] = useMemo(() => {
-    const s: (SlimCreature | null)[] = [];
-    for (let i = 0; i < 6; i++) s.push(team[i] ?? null);
-    return s;
-  }, [team]);
-
   function removeAt(i: number) {
     const creature = slots[i];
-    if (!creature) return;
     const baseId = teamIds[i];
+    if (!creature || baseId === null) return;
+    const formName = teamForms[i];
+    const formCreature = teamFormData[i];
     removeSlot(i);
     showToast(
       `Removed ${creature.name.replace(/-/g, ' ')}`,
       { label: 'Undo', fn: () => {
-        const next = [...teamIds];
-        next.splice(i, 0, baseId);
-        setTeamIds(next);
+        if (useTeamStore.getState().teamIds[i] !== null) {
+          showToast("Can't undo — that slot is no longer empty");
+          return;
+        }
+        setSlot(i, baseId);
+        if (formName && formCreature) {
+          setForm(i, formName, formCreature);
+        }
       }}
     );
   }
@@ -133,9 +135,7 @@ export function TeamPage() {
   }
 
   function pickIntoSlot(c: SlimCreature, formName: string | null, formCreature: SlimCreature | null) {
-    const next = [...teamIds];
-    next[pickerSlot] = c.id;
-    setTeamIds(next.filter(Boolean) as number[]);
+    setSlot(pickerSlot, c.id);
     if (formName && formCreature) {
       setForm(pickerSlot, formName, formCreature);
     }
