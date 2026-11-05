@@ -5,11 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/pokemonLookUp/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokémon Look Up — Dex & Team Builder</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"></noscript>
+    <meta name="description" content="Browse all 1,025 Pokémon by type, generation and base stats, then build a team of six and check its type coverage, weaknesses and moves.">
+    <link rel="preload" href="/pokemonLookUp/dex.json" as="fetch" crossorigin>
     <script>
       try {
         const stored = JSON.parse(localStorage.getItem('pokemon-theme') || '{}');
@@ -19,8 +16,9 @@
         document.documentElement.setAttribute('data-theme', 'dark');
       }
     </script>
-    <script type="module" crossorigin src="/pokemonLookUp/assets/index-C3wpgEjV.js"></script>
-    <link rel="stylesheet" crossorigin href="/pokemonLookUp/assets/index-IdsqGUgZ.css">
+    <script type="module" crossorigin src="/pokemonLookUp/assets/index-fxxFoucx.js"></script>
+    <link rel="stylesheet" crossorigin href="/pokemonLookUp/assets/index-jRHYDY5e.css">
+    <link rel="preload" as="image" href="https://wsrv.nl/?url=raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png&w=256&output=webp" imagesrcset="https://wsrv.nl/?url=raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png&w=160&output=webp 160w, https://wsrv.nl/?url=raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png&w=256&output=webp 256w, https://wsrv.nl/?url=raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png&w=320&output=webp 320w, https://wsrv.nl/?url=raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png&w=475&output=webp 475w" imagesizes="(max-width: 600px) 34vw, 200px" fetchpriority="high">
   </head>
   <body>
     <div id="root"></div>
