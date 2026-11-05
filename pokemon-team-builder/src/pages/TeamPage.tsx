@@ -43,7 +43,7 @@ function TeamSlotCard({ index, creature, baseId, onAdd, onRemove, onSelect }: {
       <div className="slot-id">#{String(dexId).padStart(3, '0')}</div>
       <button className="slot-x" aria-label="Remove" onClick={(e) => { e.stopPropagation(); onRemove(); }}>×</button>
       <div className="slot-art">
-        <Sprite id={creature.id} kind="official" />
+        <Sprite id={creature.id} kind="official" sizes="110px" />
       </div>
       <div>
         <div className="slot-name">{creature.name.replace(/-/g, ' ')}</div>

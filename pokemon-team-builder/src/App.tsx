@@ -3,8 +3,9 @@ import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { useDexStore } from './store/dexStore';
 import { useToastStore } from './store/toastStore';
 import { Navbar } from './components/layout/Navbar';
+// The landing route ships in the main bundle so its first cards don't wait on another chunk.
+import { LookupPage } from './pages/LookupPage';
 
-const LookupPage = lazy(() => import('./pages/LookupPage').then((m) => ({ default: m.LookupPage })));
 const DetailPage = lazy(() => import('./pages/DetailPage').then((m) => ({ default: m.DetailPage })));
 const TeamPage   = lazy(() => import('./pages/TeamPage').then((m) => ({ default: m.TeamPage })));
 const MovesPage  = lazy(() => import('./pages/MovesPage').then((m) => ({ default: m.MovesPage })));
@@ -23,7 +24,7 @@ function BootScreen() {
           <div className="bar" style={{ width: `${pct}%` }} />
         </div>
         <div className="boot-num" aria-hidden="true">
-          {progress.done} / {progress.total}
+          {progress.total > 0 && `${progress.done} / ${progress.total}`}
           {error && <span style={{ color: 'var(--accent-hot)' }}> · error: {error}</span>}
         </div>
         <span className="sr-only" aria-live="polite">

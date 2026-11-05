@@ -102,6 +102,13 @@ npm run build
 npm run deploy
 ```
 
+### Regenerating Committed Assets
+
+Two generated files are committed, so the build never calls PokeAPI or needs Python:
+
+- `public/dex.json` holds the summary of every Pokémon, which the dex loads at startup. Run `npm run dex:snapshot` when PokeAPI adds Pokémon or when `src/lib/slim.ts` changes shape. It needs Node 22.18 or newer.
+- `src/assets/fonts/` holds trimmed copies of the fonts. Run `pip install fonttools brotli` and then `python3 scripts/subset-fonts.py` after upgrading a `@fontsource` package or using a new non-ASCII character in the UI.
+
 ---
 
 ## 🎯 Project Highlights
@@ -112,6 +119,9 @@ npm run deploy
 - Inflight request deduplication (prevents duplicate API calls)
 
 ### ⚡ Performance
+- The dex starts from one bundled snapshot instead of 1,025 API requests
+- Card art is resized to WebP by the [wsrv.nl](https://wsrv.nl) image proxy (~13 KB instead of ~150 KB), falling back to the original PNG
+- Self-hosted fonts, trimmed to the characters the UI uses
 - Lazy-loaded route components (code splitting)
 - Intersection Observer for infinite scroll
 - Concurrent API requests with custom utilities
