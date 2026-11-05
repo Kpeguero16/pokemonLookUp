@@ -46,9 +46,9 @@
   --radius-lg: 14px;
   --radius-xl: 20px;
 
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body:    "DM Sans", system-ui, sans-serif;
-  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Space Grotesk Variable", system-ui, sans-serif;
+  --font-body:    "DM Sans Variable", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono Variable", ui-monospace, monospace;
   --font-pixel:   "Press Start 2P", "VT323", monospace;
 }
 
@@ -319,6 +319,7 @@ input, select, textarea { font: inherit; color: inherit; }
 .sort-btn:hover { background: var(--surface-hover); }
 
 .filter-label {
+  display: block;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: .12em;
@@ -359,7 +360,7 @@ input, select, textarea { font: inherit; color: inherit; }
 .type-filter-pill .swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 .type-filter-pill:hover { color: var(--fg-0); border-color: var(--border-strong); }
 .type-filter-pill.on,
-.type-filter-pill[data-on="true"] { color: #fff; background: var(--bg-3); border-color: var(--fg-2); }
+.type-filter-pill[data-on="true"] { color: var(--fg-0); background: var(--bg-3); border-color: var(--fg-2); }
 
 .range-row { display: grid; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); }
 .range-row input[type="range"] { accent-color: var(--accent); width: 100%; }
@@ -391,6 +392,9 @@ input, select, textarea { font: inherit; color: inherit; }
 
 .card {
   position: relative;
+  /* Off-screen cards skip rendering, and their lazy sprites wait until the card nears the viewport. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 250px;
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);

@@ -5,11 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokémon Look Up — Dex & Team Builder</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"></noscript>
+    <meta name="description" content="Browse all 1,025 Pokémon by type, generation and base stats, then build a team of six and check its type coverage, weaknesses and moves.">
+    <link rel="preload" href="/dex.json" as="fetch" crossorigin>
     <script>
       try {
         const stored = JSON.parse(localStorage.getItem('pokemon-theme') || '{}');

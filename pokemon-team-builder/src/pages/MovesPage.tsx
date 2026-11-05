@@ -262,6 +262,7 @@ export function MovesPage() {
           </span>
           <input
             type="text"
+            aria-label={`Search ${tab}`}
             placeholder={tab === 'moves' ? 'search moves...' : tab === 'abilities' ? 'search abilities...' : 'search natures...'}
             value={inputVal}
             onChange={(e) => handleSearch(e.target.value)}
@@ -269,24 +270,24 @@ export function MovesPage() {
         </div>
         {tab === 'moves' && (
           <>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="dex-select">
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="dex-select" aria-label="Filter by type">
               <option value="">All types</option>
               {ALL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
-            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className="dex-select">
+            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className="dex-select" aria-label="Filter by damage class">
               <option value="">All classes</option>
               <option value="physical">Physical</option>
               <option value="special">Special</option>
               <option value="status">Status</option>
             </select>
-            <select value={genFilter} onChange={(e) => setGenFilter(e.target.value)} className="dex-select">
+            <select value={genFilter} onChange={(e) => setGenFilter(e.target.value)} className="dex-select" aria-label="Filter by generation">
               <option value="">All gens</option>
               {ALL_GENS.map((g) => <option key={g} value={g}>Gen {g}</option>)}
             </select>
           </>
         )}
         {tab === 'natures' && (
-          <select value={statFilter} onChange={(e) => setStatFilter(e.target.value)} className="dex-select">
+          <select value={statFilter} onChange={(e) => setStatFilter(e.target.value)} className="dex-select" aria-label="Filter by raised stat">
             <option value="">All stats</option>
             <option value="attack">+ATK</option>
             <option value="defense">+DEF</option>

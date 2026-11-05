@@ -258,7 +258,7 @@ export function DetailPage() {
           <div className="pixel-id">N°{String(creature.id).padStart(4, '0')}</div>
           {formLoading
             ? <div className="skeleton" style={{ width: 200, height: 200, borderRadius: 16 }} />
-            : <Sprite id={activeCreature!.id} kind="official" alt={activeCreature!.name} />
+            : <Sprite id={activeCreature!.id} kind="official" alt={activeCreature!.name} priority sizes="(max-width: 800px) 72vw, 304px" />
           }
           <div className="pixel-strip">
             <Sprite id={activeCreature!.id} kind="pixel" alt="" />

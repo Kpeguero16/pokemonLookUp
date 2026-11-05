@@ -9,9 +9,11 @@ interface CreatureCardProps {
   onAdd?: (c: SlimCreature) => void;
   inTeam?: boolean;
   hasForms?: boolean;
+  /** Load the art right away at high priority: for the first cards on screen. */
+  spritePriority?: boolean;
 }
 
-export function CreatureCard({ creature, onSelect, onAdd, inTeam, hasForms }: CreatureCardProps) {
+export function CreatureCard({ creature, onSelect, onAdd, inTeam, hasForms, spritePriority }: CreatureCardProps) {
   const tint = TYPE_HEX[creature.types[0]] ?? '#666';
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -33,7 +35,7 @@ export function CreatureCard({ creature, onSelect, onAdd, inTeam, hasForms }: Cr
     >
       <div className="c-id">#{String(creature.id).padStart(3, '0')}</div>
       <div className="sprite-wrap" style={{ '--card-tint': tint } as React.CSSProperties}>
-        <Sprite id={creature.id} alt={creature.name} />
+        <Sprite id={creature.id} alt={creature.name} priority={spritePriority} />
       </div>
       <div className="c-name">
         <span>{creature.name.replace(/-/g, ' ')}</span>

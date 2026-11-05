@@ -208,8 +208,9 @@ export function LookupPage() {
         </div>
 
         <div className="range-row">
-          <div className="filter-label">Min BST</div>
+          <label className="filter-label" htmlFor="bst-min">Min BST</label>
           <input
+            id="bst-min"
             type="range"
             min="0" max="700" step="10"
             value={bstMin}
@@ -223,8 +224,8 @@ export function LookupPage() {
         </div>
 
         <div>
-          <div className="filter-label">Sort by</div>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} className="dex-select" style={{ width: '100%' }}>
+          <label className="filter-label" htmlFor="dex-sort">Sort by</label>
+          <select id="dex-sort" value={sort} onChange={(e) => setSort(e.target.value)} className="dex-select" style={{ width: '100%' }}>
             <option value="id">Dex number</option>
             <option value="name">Name (A→Z)</option>
             <option value="bst-desc">BST (high→low)</option>
@@ -296,10 +297,11 @@ export function LookupPage() {
           </div>
         ) : view === 'grid' ? (
           <div className="cards-grid">
-            {filtered.slice(0, showCount).map((c) => (
+            {filtered.slice(0, showCount).map((c, i) => (
               <CreatureCard
                 key={c.id}
                 creature={c}
+                spritePriority={i < 4}
                 onSelect={() => navigate(`/detail/${c.id}`)}
                 onAdd={() => handleAdd(c)}
                 hasForms={POKEMON_WITH_FORMS.has(c.id)}

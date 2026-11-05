@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { SlimCreature } from '../types/pokemon';
-import { fetchCreaturesRange, TOTAL_POKEMON } from '../lib/pokeapi';
+import { fetchCreaturesRange, fetchDexSnapshot, TOTAL_POKEMON } from '../lib/pokeapi';
 
 interface DexStore {
   creatures: SlimCreature[];
@@ -17,6 +17,17 @@ export const useDexStore = create<DexStore>((set) => ({
   error: null,
 
   boot: async (count = TOTAL_POKEMON) => {
+    try {
+      const snapshot = (await fetchDexSnapshot()).filter((c) => c.id <= count);
+      if (snapshot.length === count) {
+        snapshot.sort((a, b) => a.id - b.id);
+        set({ creatures: snapshot, booted: true });
+        return;
+      }
+    } catch {
+      // Missing or broken snapshot: fall back to fetching each creature from PokeAPI.
+    }
+
     const ids = Array.from({ length: count }, (_, i) => i + 1);
     set({ progress: { done: 0, total: count } });
     try {
